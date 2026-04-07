@@ -5,7 +5,13 @@
       "Bash(npx ng build:*)",
       "Bash(npm install:*)",
       "Bash(mvn compile:*)",
-      "Bash(del:*)"
+      "Bash(del:*)",
+      "Bash(mvn test:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\sunso\\\\Desktop\\\\TicketCodeIA\\\\TicketCodeIA\\\\TicketCodeIABack && mvnw.cmd test 2>&1\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\sunso\\\\Desktop\\\\TicketCodeIA\\\\TicketCodeIA\\\\TicketCodeIABack && mvnw.cmd test\")",
+      "Bash(powershell -Command \"Set-Location 'C:\\\\Users\\\\sunso\\\\Desktop\\\\TicketCodeIA\\\\TicketCodeIA\\\\TicketCodeIABack'; & '.\\\\mvnw.cmd' test 2>&1\")",
+      "Bash(powershell:*)"
     ]
   }
 }
