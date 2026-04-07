@@ -94,4 +94,13 @@ public class TicketService {
     public Ticket saveTicket(Ticket ticket) {
         return ticketRepository.save(ticket);
     }
+
+    @Transactional
+    public void saveAgentFlags(Long id, boolean enableCodeReview, boolean enableTesting) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
+        ticket.setEnableCodeReview(enableCodeReview);
+        ticket.setEnableTesting(enableTesting);
+        ticketRepository.save(ticket);
+    }
 }

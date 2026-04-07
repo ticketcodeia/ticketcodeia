@@ -25,6 +25,8 @@ public class TicketResponse {
     private AgentType assignedAgent;
     private List<String> agentLogs;
     private String branchName;
+    private boolean enableCodeReview;
+    private boolean enableTesting;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -38,6 +40,8 @@ public class TicketResponse {
                 .assignedAgent(ticket.getAssignedAgent())
                 .agentLogs(ticket.getAgentLogs())
                 .branchName(ticket.getBranchName())
+                .enableCodeReview(ticket.isEnableCodeReview())
+                .enableTesting(ticket.isEnableTesting())
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
                 .build();

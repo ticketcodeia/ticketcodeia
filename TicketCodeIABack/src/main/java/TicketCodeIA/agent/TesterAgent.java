@@ -1,12 +1,12 @@
 package TicketCodeIA.agent;
 
+import TicketCodeIA.dto.SseEvent;
 import TicketCodeIA.entity.Ticket;
 import TicketCodeIA.enums.AgentType;
 import TicketCodeIA.enums.TicketStatus;
 import TicketCodeIA.service.AgentLogService;
 import TicketCodeIA.service.SseService;
 import TicketCodeIA.service.TicketService;
-import TicketCodeIA.dto.SseEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -26,7 +28,7 @@ public class TesterAgent {
     private final AgentLogService agentLogService;
     private final SseService sseService;
 
-    @Value("${tickcode.workspace:/tmp/tickcode-workspace}")
+    @Value("${tickcode.workspace:C:/tickcode-workspace}")
     private String workspacePath;
 
     @Value("${tickcode.agents.claude-code-max-turns:10}")
@@ -57,42 +59,45 @@ public class TesterAgent {
 
             String claudePrompt = String.format(
                     "Write and run unit tests for the recent changes related to: %s\n\nDescription: %s\n\n" +
-                    "Create test files and execute them. Report if tests pass or fail.",
+                    "Create test files, execute them, and report whether they pass or fail. " +
+                    "End your response with either 'ALL TESTS PASSED' or 'TESTS FAILED'.",
                     ticket.getTitle(),
                     ticket.getDescription()
             );
 
-            ProcessBuilder pb = new ProcessBuilder(
-                    "claude", "-p", claudePrompt,
-                    "--output-format", "json",
-                    "--max-turns", String.valueOf(maxTurns),
-                    "--allowedTools", "Read,Write,Edit,Bash"
-            );
+            List<String> command = buildClaudeCommand(claudePrompt);
+            log.info("Tester Agent: Running command: {}", String.join(" ", command));
+
+            ProcessBuilder pb = new ProcessBuilder(command);
             pb.directory(workspace);
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
 
             StringBuilder output = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     output.append(line).append("\n");
+                    log.debug("Claude Code: {}", line);
                 }
             }
 
             boolean completed = process.waitFor(5, TimeUnit.MINUTES);
-            int exitCode = completed ? process.exitValue() : -1;
 
             if (!completed) {
                 process.destroyForcibly();
-                throw new RuntimeException("Claude Code CLI timed out during testing");
+                String msg = "Claude Code CLI timed out during testing";
+                ticket.addAgentLog("Tester Agent: " + msg);
+                ticketService.saveTicket(ticket);
+                agentLogService.log(ticket.getId(), AgentType.TESTER, "TIMEOUT", msg);
+                return AgentResult.failure(msg);
             }
 
+            int exitCode = process.exitValue();
             String outputStr = output.toString().toLowerCase();
-            boolean testsPass = exitCode == 0 &&
-                    (outputStr.contains("pass") || outputStr.contains("success")) &&
-                    !outputStr.contains("fail");
+            boolean testsPass = exitCode == 0 && outputStr.contains("all tests passed");
 
             if (testsPass) {
                 ticket.setStatus(TicketStatus.DONE);
@@ -111,7 +116,7 @@ public class TesterAgent {
 
                 return AgentResult.success("All tests passed");
             } else {
-                String failureMsg = "Tests failed or incomplete";
+                String failureMsg = "Tests failed (exit code " + exitCode + ")";
                 ticket.addAgentLog("Tester Agent: " + failureMsg);
                 ticketService.saveTicket(ticket);
 
@@ -130,12 +135,38 @@ public class TesterAgent {
         } catch (Exception e) {
             log.error("Tester Agent: Error testing ticket {}", ticket.getId(), e);
 
-            ticket.addAgentLog("Tester Agent error: " + e.getMessage());
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            ticket.addAgentLog("Tester Agent error: " + errorMsg);
             ticketService.saveTicket(ticket);
 
-            agentLogService.log(ticket.getId(), AgentType.TESTER, "ERROR", e.getMessage());
+            agentLogService.log(ticket.getId(), AgentType.TESTER, "ERROR", errorMsg);
 
-            return AgentResult.failure(e.getMessage());
+            return AgentResult.failure(errorMsg);
         }
+    }
+
+    private List<String> buildClaudeCommand(String prompt) {
+        List<String> command = new ArrayList<>();
+
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+        if (isWindows) {
+            command.add("cmd");
+            command.add("/c");
+            command.add("claude");
+        } else {
+            command.add("claude");
+        }
+
+        command.add("--print");
+        command.add(prompt);
+        command.add("--output-format");
+        command.add("text");
+        command.add("--max-turns");
+        command.add(String.valueOf(maxTurns));
+        command.add("--allowedTools");
+        command.add("Read,Write,Edit,Bash");
+        command.add("--dangerously-skip-permissions");
+
+        return command;
     }
 }

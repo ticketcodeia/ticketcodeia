@@ -51,8 +51,14 @@ public class TicketController {
     }
 
     @PostMapping("/{id}/process")
-    public ResponseEntity<TicketResponse> processTicket(@PathVariable Long id) {
-        agentOrchestrator.processTicketAsync(id);
+    public ResponseEntity<TicketResponse> processTicket(
+            @PathVariable Long id,
+            @RequestBody(required = false) TicketCodeIA.dto.ProcessTicketRequest request) {
+        if (request == null) {
+            request = new TicketCodeIA.dto.ProcessTicketRequest(true, true);
+        }
+        ticketService.saveAgentFlags(id, request.isEnableCodeReview(), request.isEnableTesting());
+        agentOrchestrator.processTicketAsync(id, request.isEnableCodeReview(), request.isEnableTesting());
         TicketResponse ticket = ticketService.getTicketById(id);
         return ResponseEntity.accepted().body(ticket);
     }

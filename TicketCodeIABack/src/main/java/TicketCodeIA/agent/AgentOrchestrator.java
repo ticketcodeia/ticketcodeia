@@ -1,12 +1,12 @@
 package TicketCodeIA.agent;
 
+import TicketCodeIA.dto.SseEvent;
 import TicketCodeIA.entity.Ticket;
 import TicketCodeIA.enums.AgentType;
 import TicketCodeIA.enums.TicketStatus;
 import TicketCodeIA.service.AgentLogService;
 import TicketCodeIA.service.SseService;
 import TicketCodeIA.service.TicketService;
-import TicketCodeIA.dto.SseEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,16 +29,17 @@ public class AgentOrchestrator {
     private int maxRetries;
 
     @Async
-    public void processTicketAsync(Long ticketId) {
+    public void processTicketAsync(Long ticketId, boolean enableCodeReview, boolean enableTesting) {
         try {
-            processTicket(ticketId);
+            processTicket(ticketId, enableCodeReview, enableTesting);
         } catch (Exception e) {
             log.error("Error processing ticket {} asynchronously", ticketId, e);
         }
     }
 
-    public void processTicket(Long ticketId) {
-        log.info("Orchestrator: Starting pipeline for ticket {}", ticketId);
+    public void processTicket(Long ticketId, boolean enableCodeReview, boolean enableTesting) {
+        log.info("Orchestrator: Starting pipeline for ticket {} (codeReview={}, testing={})",
+                ticketId, enableCodeReview, enableTesting);
 
         Ticket ticket = ticketService.getTicketEntity(ticketId);
 
@@ -47,15 +48,12 @@ public class AgentOrchestrator {
             return;
         }
 
+        String modeMsg = buildModeMessage(enableCodeReview, enableTesting);
         agentLogService.log(ticketId, AgentType.HUMAN, "PIPELINE_STARTED",
-                "Agent pipeline initiated for ticket: " + ticket.getTitle());
+                "Pipeline started — " + modeMsg);
 
-        sseService.broadcast(SseEvent.ticketUpdated(
-                ticketId,
-                ticket.getStatus(),
-                AgentType.HUMAN,
-                "Pipeline started"
-        ));
+        sseService.broadcast(SseEvent.ticketUpdated(ticketId, ticket.getStatus(), AgentType.HUMAN,
+                "Pipeline started — " + modeMsg));
 
         int developmentCycles = 0;
 
@@ -63,16 +61,37 @@ public class AgentOrchestrator {
             ticket = ticketService.getTicketEntity(ticketId);
 
             switch (ticket.getStatus()) {
+
                 case TODO:
-                case IN_PROGRESS:
+                case IN_PROGRESS: {
                     AgentResult devResult = developerAgent.process(ticket);
                     if (devResult.isFailure()) {
                         escalateTicket(ticket, "Development failed: " + devResult.getMessage());
                         return;
                     }
+                    // After dev, decide next step based on enabled agents
+                    ticket = ticketService.getTicketEntity(ticketId);
+                    if (!enableCodeReview && !enableTesting) {
+                        markDone(ticket, "Skipped review and testing (both disabled)");
+                        return;
+                    }
+                    if (!enableCodeReview) {
+                        // Skip review, go straight to testing
+                        ticket.setStatus(TicketStatus.TESTING);
+                        ticketService.saveTicket(ticket);
+                        sseService.broadcast(SseEvent.ticketUpdated(ticketId, TicketStatus.TESTING,
+                                AgentType.DEVELOPER, "Code review skipped, moving to testing"));
+                    }
                     break;
+                }
 
-                case CODE_REVIEW:
+                case CODE_REVIEW: {
+                    if (!enableCodeReview) {
+                        // Should not reach here, but handle gracefully
+                        ticket.setStatus(enableTesting ? TicketStatus.TESTING : TicketStatus.DONE);
+                        ticketService.saveTicket(ticket);
+                        break;
+                    }
                     AgentResult reviewResult = reviewerAgent.process(ticket);
                     if (reviewResult.isFailure()) {
                         escalateTicket(ticket, "Review failed: " + reviewResult.getMessage());
@@ -88,17 +107,25 @@ public class AgentOrchestrator {
                         ticket.setStatus(TicketStatus.IN_PROGRESS);
                         ticket.setRetryCount(developmentCycles);
                         ticketService.saveTicket(ticket);
-
-                        sseService.broadcast(SseEvent.ticketUpdated(
-                                ticketId,
-                                TicketStatus.IN_PROGRESS,
-                                AgentType.REVIEWER,
-                                "Changes requested, returning to development (cycle " + developmentCycles + ")"
-                        ));
+                        sseService.broadcast(SseEvent.ticketUpdated(ticketId, TicketStatus.IN_PROGRESS,
+                                AgentType.REVIEWER, "Changes requested, retry " + developmentCycles));
+                    } else {
+                        // Approved — check if testing is enabled
+                        if (!enableTesting) {
+                            ticket = ticketService.getTicketEntity(ticketId);
+                            markDone(ticket, "Testing disabled, marking done after review approval");
+                            return;
+                        }
                     }
                     break;
+                }
 
-                case TESTING:
+                case TESTING: {
+                    if (!enableTesting) {
+                        ticket = ticketService.getTicketEntity(ticketId);
+                        markDone(ticket, "Testing disabled");
+                        return;
+                    }
                     AgentResult testResult = testerAgent.process(ticket);
                     if (testResult.isSuccess()) {
                         log.info("Orchestrator: Ticket {} completed successfully", ticketId);
@@ -116,22 +143,14 @@ public class AgentOrchestrator {
                         ticket.setStatus(TicketStatus.IN_PROGRESS);
                         ticket.setRetryCount(developmentCycles);
                         ticketService.saveTicket(ticket);
-
-                        sseService.broadcast(SseEvent.ticketUpdated(
-                                ticketId,
-                                TicketStatus.IN_PROGRESS,
-                                AgentType.TESTER,
-                                "Tests failed, returning to development (cycle " + developmentCycles + ")"
-                        ));
+                        sseService.broadcast(SseEvent.ticketUpdated(ticketId, TicketStatus.IN_PROGRESS,
+                                AgentType.TESTER, "Tests failed, retry " + developmentCycles));
                     }
                     break;
+                }
 
                 case DONE:
-                    log.info("Orchestrator: Ticket {} is already done", ticketId);
-                    return;
-
                 case ESCALATED:
-                    log.info("Orchestrator: Ticket {} is escalated, stopping pipeline", ticketId);
                     return;
             }
 
@@ -144,21 +163,31 @@ public class AgentOrchestrator {
         escalateTicket(ticketService.getTicketEntity(ticketId), "Max retry cycles exceeded");
     }
 
-    private void escalateTicket(Ticket ticket, String reason) {
-        log.warn("Orchestrator: Escalating ticket {} - {}", ticket.getId(), reason);
+    private void markDone(Ticket ticket, String reason) {
+        ticket.setStatus(TicketStatus.DONE);
+        ticket.setAssignedAgent(AgentType.DEVELOPER);
+        ticket.addAgentLog("Marked DONE: " + reason);
+        ticketService.saveTicket(ticket);
+        agentLogService.log(ticket.getId(), AgentType.HUMAN, "PIPELINE_COMPLETED", reason);
+        sseService.broadcast(SseEvent.ticketUpdated(ticket.getId(), TicketStatus.DONE,
+                AgentType.DEVELOPER, "Ticket completed — " + reason));
+    }
 
+    private void escalateTicket(Ticket ticket, String reason) {
+        log.warn("Orchestrator: Escalating ticket {} — {}", ticket.getId(), reason);
         ticket.setStatus(TicketStatus.ESCALATED);
         ticket.setAssignedAgent(AgentType.HUMAN);
         ticket.addAgentLog("ESCALATED: " + reason);
         ticketService.saveTicket(ticket);
-
         agentLogService.log(ticket.getId(), AgentType.HUMAN, "ESCALATED", reason);
+        sseService.broadcast(SseEvent.ticketUpdated(ticket.getId(), TicketStatus.ESCALATED,
+                AgentType.HUMAN, "Escalated: " + reason));
+    }
 
-        sseService.broadcast(SseEvent.ticketUpdated(
-                ticket.getId(),
-                TicketStatus.ESCALATED,
-                AgentType.HUMAN,
-                "Ticket escalated: " + reason
-        ));
+    private String buildModeMessage(boolean enableCodeReview, boolean enableTesting) {
+        if (enableCodeReview && enableTesting) return "full pipeline (dev → review → test)";
+        if (enableCodeReview) return "dev + review only (testing skipped)";
+        if (enableTesting) return "dev + testing only (review skipped)";
+        return "dev only (review and testing skipped)";
     }
 }
