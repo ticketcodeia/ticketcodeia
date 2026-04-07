@@ -31,8 +31,9 @@ public class TicketController {
 
     @GetMapping
     public ResponseEntity<List<TicketResponse>> getAllTickets(
+            @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) TicketStatus status) {
-        List<TicketResponse> tickets = ticketService.getAllTickets(status);
+        List<TicketResponse> tickets = ticketService.getAllTickets(projectId, status);
         return ResponseEntity.ok(tickets);
     }
 

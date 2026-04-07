@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RequirementsRequest {
     private String requirements;
+    private Long projectId;
 }

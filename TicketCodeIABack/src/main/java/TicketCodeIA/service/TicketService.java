@@ -28,23 +28,25 @@ public class TicketService {
                 .priority(request.getPriority() != null ? request.getPriority() : Priority.MEDIUM)
                 .status(TicketStatus.TODO)
                 .build();
-
-        Ticket saved = ticketRepository.save(ticket);
-        return TicketResponse.fromEntity(saved);
+        return TicketResponse.fromEntity(ticketRepository.save(ticket));
     }
 
-    public List<TicketResponse> getAllTickets(TicketStatus status) {
+    @Transactional(readOnly = true)
+    public List<TicketResponse> getAllTickets(Long projectId, TicketStatus status) {
         List<Ticket> tickets;
-        if (status != null) {
+        if (projectId != null && status != null) {
+            tickets = ticketRepository.findByProjectIdAndStatus(projectId, status);
+        } else if (projectId != null) {
+            tickets = ticketRepository.findByProjectIdOrderByCreatedAtDesc(projectId);
+        } else if (status != null) {
             tickets = ticketRepository.findByStatus(status);
         } else {
             tickets = ticketRepository.findAllByOrderByCreatedAtDesc();
         }
-        return tickets.stream()
-                .map(TicketResponse::fromEntity)
-                .collect(Collectors.toList());
+        return tickets.stream().map(TicketResponse::fromEntity).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public TicketResponse getTicketById(Long id) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
@@ -55,24 +57,14 @@ public class TicketService {
     public TicketResponse updateTicket(Long id, TicketRequest request) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
-
-        if (request.getTitle() != null) {
-            ticket.setTitle(request.getTitle());
-        }
-        if (request.getDescription() != null) {
-            ticket.setDescription(request.getDescription());
-        }
-        if (request.getPriority() != null) {
-            ticket.setPriority(request.getPriority());
-        }
-        if (request.getStatus() != null) {
-            ticket.setStatus(request.getStatus());
-        }
-
-        Ticket updated = ticketRepository.save(ticket);
-        return TicketResponse.fromEntity(updated);
+        if (request.getTitle() != null) ticket.setTitle(request.getTitle());
+        if (request.getDescription() != null) ticket.setDescription(request.getDescription());
+        if (request.getPriority() != null) ticket.setPriority(request.getPriority());
+        if (request.getStatus() != null) ticket.setStatus(request.getStatus());
+        return TicketResponse.fromEntity(ticketRepository.save(ticket));
     }
 
+    @Transactional(readOnly = true)
     public TicketStats getStats() {
         return TicketStats.builder()
                 .total(ticketRepository.count())

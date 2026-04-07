@@ -12,9 +12,15 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     List<Ticket> findByStatus(TicketStatus status);
 
-    List<Ticket> findByStatusIn(List<TicketStatus> statuses);
+    List<Ticket> findByProjectId(Long projectId);
+
+    List<Ticket> findByProjectIdAndStatus(Long projectId, TicketStatus status);
 
     long countByStatus(TicketStatus status);
 
+    long countByProjectIdAndStatus(Long projectId, TicketStatus status);
+
     List<Ticket> findAllByOrderByCreatedAtDesc();
+
+    List<Ticket> findByProjectIdOrderByCreatedAtDesc(Long projectId);
 }

@@ -18,7 +18,8 @@ public class AgentController {
 
     @PostMapping("/generate-tickets")
     public ResponseEntity<List<TicketResponse>> generateTickets(@RequestBody RequirementsRequest request) {
-        List<TicketResponse> tickets = poAgent.generateTicketsFromRequirements(request.getRequirements());
+        List<TicketResponse> tickets = poAgent.generateTicketsFromRequirements(
+                request.getRequirements(), request.getProjectId());
         return ResponseEntity.ok(tickets);
     }
 }

@@ -27,6 +27,8 @@ public class TicketResponse {
     private String branchName;
     private boolean enableCodeReview;
     private boolean enableTesting;
+    private Long projectId;
+    private String projectName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -42,6 +44,8 @@ public class TicketResponse {
                 .branchName(ticket.getBranchName())
                 .enableCodeReview(ticket.isEnableCodeReview())
                 .enableTesting(ticket.isEnableTesting())
+                .projectId(ticket.getProject() != null ? ticket.getProject().getId() : null)
+                .projectName(ticket.getProject() != null ? ticket.getProject().getName() : null)
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
                 .build();

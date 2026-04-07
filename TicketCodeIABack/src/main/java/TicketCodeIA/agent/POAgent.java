@@ -1,12 +1,14 @@
 package TicketCodeIA.agent;
 
 import TicketCodeIA.dto.TicketResponse;
+import TicketCodeIA.entity.Project;
 import TicketCodeIA.entity.Ticket;
 import TicketCodeIA.enums.AgentType;
 import TicketCodeIA.enums.Priority;
 import TicketCodeIA.enums.TicketStatus;
 import TicketCodeIA.repository.TicketRepository;
 import TicketCodeIA.service.AgentLogService;
+import TicketCodeIA.service.ProjectService;
 import TicketCodeIA.service.SseService;
 import TicketCodeIA.dto.SseEvent;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -30,9 +32,10 @@ public class POAgent {
     private final TicketRepository ticketRepository;
     private final AgentLogService agentLogService;
     private final SseService sseService;
+    private final ProjectService projectService;
     private final ObjectMapper objectMapper;
 
-    public List<TicketResponse> generateTicketsFromRequirements(String requirements) {
+    public List<TicketResponse> generateTicketsFromRequirements(String requirements, Long projectId) {
         log.info("PO Agent: Processing requirements to generate tickets");
 
         String prompt = """
@@ -63,6 +66,7 @@ public class POAgent {
                     new TypeReference<List<Map<String, String>>>() {}
             );
 
+            Project project = projectId != null ? projectService.getEntityById(projectId) : null;
             List<Ticket> createdTickets = new ArrayList<>();
 
             for (Map<String, String> data : ticketData) {
@@ -72,6 +76,7 @@ public class POAgent {
                         .priority(parsePriority(data.get("priority")))
                         .status(TicketStatus.TODO)
                         .assignedAgent(AgentType.PO)
+                        .project(project)
                         .build();
 
                 Ticket saved = ticketRepository.save(ticket);
