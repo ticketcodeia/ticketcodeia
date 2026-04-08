@@ -11,7 +11,10 @@
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\sunso\\\\Desktop\\\\TicketCodeIA\\\\TicketCodeIA\\\\TicketCodeIABack && mvnw.cmd test 2>&1\")",
       "Bash(cmd /c \"cd /d C:\\\\Users\\\\sunso\\\\Desktop\\\\TicketCodeIA\\\\TicketCodeIA\\\\TicketCodeIABack && mvnw.cmd test\")",
       "Bash(powershell -Command \"Set-Location 'C:\\\\Users\\\\sunso\\\\Desktop\\\\TicketCodeIA\\\\TicketCodeIA\\\\TicketCodeIABack'; & '.\\\\mvnw.cmd' test 2>&1\")",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(ls \"C:/Users/sunso/Desktop/TicketCodeIA/TicketCodeIA/TicketCodeIABack/target/surefire-reports/\"*.dumpstream)",
+      "Bash(cat \"C:/Users/sunso/Desktop/TicketCodeIA/TicketCodeIA/TicketCodeIABack/target/surefire-reports/\"*.dumpstream)",
+      "Bash(./mvnw clean:*)"
     ]
   }
 }
