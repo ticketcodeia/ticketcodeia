@@ -1,0 +1,101 @@
+<div class="requirements-container">
+  <h1>Requirements Input</h1>
+  <p class="subtitle">Select a project, enter requirements, and let the PO Agent generate tickets.</p>
+
+  <!-- Project selector -->
+  <mat-card class="project-card">
+    <mat-card-content>
+      <h3>Project</h3>
+      <div class="project-row">
+        <mat-form-field appearance="outline" class="project-select">
+          <mat-label>Select Project</mat-label>
+          <mat-select [(ngModel)]="selectedProjectId">
+            <mat-option [value]="null">— No project —</mat-option>
+            @for (project of projects(); track project.id) {
+              <mat-option [value]="project.id">{{ project.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-stroked-button color="primary" (click)="showNewProject = !showNewProject">
+          <mat-icon>add</mat-icon> New Project
+        </button>
+      </div>
+
+      @if (showNewProject) {
+        <div class="new-project-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Project Name</mat-label>
+            <input matInput [(ngModel)]="newProjectName" placeholder="My Project" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description (optional)</mat-label>
+            <input matInput [(ngModel)]="newProjectDescription" placeholder="What is this project about?" />
+          </mat-form-field>
+          <button mat-raised-button color="primary"
+            [disabled]="!newProjectName.trim() || creatingProject()"
+            (click)="createProject()">
+            {{ creatingProject() ? 'Creating...' : 'Create Project' }}
+          </button>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Requirements input -->
+  <mat-card class="input-card">
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Requirements</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="requirements"
+          placeholder="Enter your requirements here. Be as detailed as possible..."
+          rows="10">
+        </textarea>
+      </mat-form-field>
+
+      <div class="actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="generateTickets()"
+          [disabled]="generating() || !requirements.trim()">
+          @if (generating()) {
+            <mat-spinner diameter="20" />
+            <span>Generating...</span>
+          } @else {
+            <mat-icon>auto_awesome</mat-icon>
+            <span>Generate Tickets</span>
+          }
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if (generatedTickets().length > 0) {
+    <div class="generated-section">
+      <h2>Generated Tickets ({{ generatedTickets().length }})</h2>
+      <div class="tickets-list">
+        @for (ticket of generatedTickets(); track ticket.id) {
+          <mat-card class="ticket-card">
+            <mat-card-content>
+              <div class="ticket-header">
+                <span class="ticket-id">#{{ ticket.id }}</span>
+                <app-status-badge [status]="ticket.status" />
+                @if (ticket.projectName) {
+                  <span class="project-badge">{{ ticket.projectName }}</span>
+                }
+                <span class="ticket-priority" [class]="ticket.priority.toLowerCase()">
+                  {{ ticket.priority }}
+                </span>
+              </div>
+              <h3 class="ticket-title">{{ ticket.title }}</h3>
+              <p class="ticket-description">{{ ticket.description }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </div>
+  }
+</div>

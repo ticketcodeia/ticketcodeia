@@ -1,0 +1,49 @@
+<div class="board-container">
+  <div class="board-header">
+    <h1>Kanban Board</h1>
+    <mat-form-field appearance="outline" class="project-select">
+      <mat-label>Project</mat-label>
+      <mat-select [(ngModel)]="selectedProjectId" (ngModelChange)="onProjectChange()">
+        <mat-option [value]="null">— All projects —</mat-option>
+        @for (project of projects(); track project.id) {
+          <mat-option [value]="project.id">{{ project.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="board">
+    @for (column of columns; track column.status) {
+      <div class="column">
+        <div class="column-header" [style.border-top-color]="column.color">
+          <span class="column-title">{{ column.title }}</span>
+          <span class="column-count">{{ getTicketsByStatus(column.status).length }}</span>
+        </div>
+        <div class="column-content">
+          @for (ticket of getTicketsByStatus(column.status); track ticket.id) {
+            <mat-card class="ticket-card" (click)="openTicketDialog(ticket)">
+              <mat-card-content>
+                <div class="ticket-header">
+                  <span class="ticket-id">#{{ ticket.id }}</span>
+                  <span class="ticket-priority" [class]="ticket.priority.toLowerCase()">
+                    {{ ticket.priority }}
+                  </span>
+                </div>
+                <div class="ticket-title">{{ ticket.title }}</div>
+                <div class="ticket-footer">
+                  <div class="agent-flags">
+                    <span class="flag" [class.active]="ticket.enableCodeReview" title="Code Review">🔍</span>
+                    <span class="flag" [class.active]="ticket.enableTesting" title="Testing">🧪</span>
+                  </div>
+                  <app-agent-avatar [agent]="ticket.assignedAgent" />
+                </div>
+              </mat-card-content>
+            </mat-card>
+          } @empty {
+            <div class="empty-column">No tickets</div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

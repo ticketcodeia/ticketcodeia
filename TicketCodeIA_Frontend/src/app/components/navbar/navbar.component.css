@@ -1,0 +1,42 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: 32px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-links a {
+  color: white;
+}
+
+.nav-links a.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.connection-status {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background-color: #f44336;
+  color: white;
+}
+
+.connection-status.connected {
+  background-color: #4caf50;
+}

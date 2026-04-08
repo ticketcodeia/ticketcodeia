@@ -1,0 +1,64 @@
+<div class="escalations-container">
+  <h1>Escalated Tickets</h1>
+  <p class="subtitle">These tickets require human intervention to resolve.</p>
+
+  @if (escalatedTickets().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <div class="empty-state">
+          <mat-icon>check_circle</mat-icon>
+          <h3>No Escalated Tickets</h3>
+          <p>All tickets are being handled by the AI agents.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="tickets-list">
+      @for (ticket of escalatedTickets(); track ticket.id) {
+        <mat-card class="escalation-card">
+          <mat-card-content>
+            <div class="card-header">
+              <div class="ticket-info">
+                <span class="ticket-id">#{{ ticket.id }}</span>
+                <h3 class="ticket-title">{{ ticket.title }}</h3>
+              </div>
+              <span class="ticket-priority" [class]="ticket.priority.toLowerCase()">
+                {{ ticket.priority }}
+              </span>
+            </div>
+
+            <p class="ticket-description">{{ ticket.description }}</p>
+
+            @if (ticket.agentLogs && ticket.agentLogs.length > 0) {
+              <div class="escalation-reason">
+                <strong>Escalation Reason:</strong>
+                <p>{{ getEscalationReason(ticket) }}</p>
+              </div>
+            }
+
+            <div class="card-footer">
+              <div class="agent-info">
+                <app-agent-avatar [agent]="ticket.assignedAgent" />
+                <span>{{ ticket.assignedAgent || 'Unassigned' }}</span>
+              </div>
+
+              <div class="actions">
+                <button mat-button (click)="viewDetails(ticket)">
+                  View Details
+                </button>
+                <mat-form-field appearance="outline" class="resolve-select">
+                  <mat-label>Resolve To</mat-label>
+                  <mat-select (selectionChange)="resolveTicket(ticket, $event.value)">
+                    <mat-option value="TODO">To Do</mat-option>
+                    <mat-option value="IN_PROGRESS">In Progress</mat-option>
+                    <mat-option value="DONE">Mark as Done</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

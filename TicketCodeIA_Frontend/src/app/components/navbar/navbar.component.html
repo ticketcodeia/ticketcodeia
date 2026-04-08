@@ -1,0 +1,21 @@
+<mat-toolbar color="primary" class="navbar">
+  <span class="logo">TickCode</span>
+  <nav class="nav-links">
+    <a mat-button routerLink="/dashboard" routerLinkActive="active">
+      Dashboard
+    </a>
+    <a mat-button routerLink="/board" routerLinkActive="active">
+      Kanban Board
+    </a>
+    <a mat-button routerLink="/requirements" routerLinkActive="active">
+      Requirements
+    </a>
+    <a mat-button routerLink="/escalations" routerLinkActive="active">
+      Escalations
+    </a>
+  </nav>
+  <span class="spacer"></span>
+  <span class="connection-status" [class.connected]="sseService.connected()">
+    {{ sseService.connected() ? 'Connected' : 'Disconnected' }}
+  </span>
+</mat-toolbar>

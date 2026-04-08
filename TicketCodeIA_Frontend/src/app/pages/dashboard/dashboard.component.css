@@ -1,0 +1,51 @@
+.dashboard-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin-bottom: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 48px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.stat-card.total .stat-value { color: #424242; }
+.stat-card.todo .stat-value { color: #1565c0; }
+.stat-card.in-progress .stat-value { color: #e65100; }
+.stat-card.code-review .stat-value { color: #7b1fa2; }
+.stat-card.testing .stat-value { color: #2e7d32; }
+.stat-card.done .stat-value { color: #00695c; }
+.stat-card.escalated .stat-value { color: #c62828; }
+
+.activity-card {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.no-activity {
+  text-align: center;
+  color: #666;
+  padding: 24px;
+}

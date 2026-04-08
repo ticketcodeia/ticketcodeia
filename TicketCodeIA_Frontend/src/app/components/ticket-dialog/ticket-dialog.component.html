@@ -1,0 +1,84 @@
+<h2 mat-dialog-title>
+  <div class="title-row">
+    <span>#{{ data.id }} - {{ data.title }}</span>
+    <app-status-badge [status]="data.status" />
+  </div>
+</h2>
+
+<mat-dialog-content>
+  <div class="section">
+    <h4>Description</h4>
+    <p>{{ data.description || 'No description provided.' }}</p>
+  </div>
+
+  <mat-divider />
+
+  <div class="info-grid">
+    <div class="info-item">
+      <span class="label">Priority</span>
+      <span class="value priority" [class]="data.priority.toLowerCase()">{{ data.priority }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Assigned Agent</span>
+      <div class="value agent-row">
+        <app-agent-avatar [agent]="data.assignedAgent" />
+        <span>{{ data.assignedAgent || 'Unassigned' }}</span>
+      </div>
+    </div>
+    <div class="info-item">
+      <span class="label">Branch</span>
+      <span class="value">{{ data.branchName || 'N/A' }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Created</span>
+      <span class="value">{{ data.createdAt | date:'medium' }}</span>
+    </div>
+  </div>
+
+  @if (data.agentLogs && data.agentLogs.length > 0) {
+    <mat-divider />
+    <div class="section">
+      <h4>Agent Logs</h4>
+      <ul class="logs-list">
+        @for (log of data.agentLogs; track log) {
+          <li>{{ log }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <mat-divider />
+  <div class="pipeline-options">
+    <h4>Agent Configuration</h4>
+    <div class="checkboxes">
+      <mat-checkbox
+        [(ngModel)]="enableCodeReview"
+        [disabled]="!isEditable()"
+        color="primary"
+        matTooltip="Run the Reviewer Agent after development">
+        🔍 Code Review Agent
+      </mat-checkbox>
+      <mat-checkbox
+        [(ngModel)]="enableTesting"
+        [disabled]="!isEditable()"
+        color="primary"
+        matTooltip="Run the Tester Agent after review">
+        🧪 Testing Agent
+      </mat-checkbox>
+    </div>
+    <p class="pipeline-summary">{{ pipelineSummary() }}</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (data.status !== 'DONE' && data.status !== 'ESCALATED') {
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="processTicket()"
+      [disabled]="processing()">
+      {{ processing() ? 'Processing...' : 'Start Agent Pipeline' }}
+    </button>
+  }
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>
