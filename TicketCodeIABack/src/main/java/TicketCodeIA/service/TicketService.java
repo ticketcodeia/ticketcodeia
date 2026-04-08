@@ -77,8 +77,9 @@ public class TicketService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public Ticket getTicketEntity(Long id) {
-        return ticketRepository.findById(id)
+        return ticketRepository.findByIdWithProject(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
     }
 

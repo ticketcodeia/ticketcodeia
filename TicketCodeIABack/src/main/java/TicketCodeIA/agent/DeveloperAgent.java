@@ -50,8 +50,11 @@ public class DeveloperAgent {
                 ticket.getId(), TicketStatus.IN_PROGRESS, AgentType.DEVELOPER, "Development started"));
 
         try {
-            // Ensure workspace exists
-            File workspace = new File(workspacePath);
+            // Build project-specific workspace: C:/tickcode-workspace/{project-name}
+            String projectFolder = (ticket.getProject() != null && ticket.getProject().getName() != null)
+                    ? ticket.getProject().getName().replaceAll("[^a-zA-Z0-9_\\-]", "_")
+                    : "ticket-" + ticket.getId();
+            File workspace = new File(workspacePath, projectFolder);
             if (!workspace.exists()) {
                 workspace.mkdirs();
             }
