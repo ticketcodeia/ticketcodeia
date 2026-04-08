@@ -14,7 +14,10 @@
       "Bash(powershell:*)",
       "Bash(ls \"C:/Users/sunso/Desktop/TicketCodeIA/TicketCodeIA/TicketCodeIABack/target/surefire-reports/\"*.dumpstream)",
       "Bash(cat \"C:/Users/sunso/Desktop/TicketCodeIA/TicketCodeIA/TicketCodeIABack/target/surefire-reports/\"*.dumpstream)",
-      "Bash(./mvnw clean:*)"
+      "Bash(./mvnw clean:*)",
+      "Bash(npm list:*)",
+      "Bash(npm test:*)",
+      "Bash(npx ng:*)"
     ]
   }
 }
