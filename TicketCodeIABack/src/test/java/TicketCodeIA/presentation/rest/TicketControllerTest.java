@@ -36,6 +36,7 @@ class TicketControllerTest {
     @MockBean private GetTicketStatsUseCase getTicketStatsUseCase;
     @MockBean private ProcessTicketUseCase processTicketUseCase;
     @MockBean private GetAgentLogsUseCase getAgentLogsUseCase;
+    @MockBean private MoveTicketOnHumanBoardUseCase moveTicketOnHumanBoardUseCase;
 
     private TicketResult sampleResult(Long id) {
         return new TicketResult(id, "Title " + id, "Desc", TicketStatus.TODO, Priority.MEDIUM,
@@ -97,7 +98,7 @@ class TicketControllerTest {
     @Test
     void getStats_returns200() throws Exception {
         when(getTicketStatsUseCase.execute()).thenReturn(
-                new TicketStatsResult(10, 3, 2, 1, 1, 2, 1));
+                new TicketStatsResult(10, 3, 2, 1, 1, 2, 1, 0, 0, 0, 0));
 
         mockMvc.perform(get("/api/tickets/stats"))
                 .andExpect(status().isOk())

@@ -27,6 +27,11 @@ export const routes: Routes = [
       .then(m => m.EscalationsComponent)
   },
   {
+    path: 'human-board',
+    loadComponent: () => import('./pages/human-board/human-board.component')
+      .then(m => m.HumanBoardComponent)
+  },
+  {
     path: '**',
     redirectTo: 'dashboard'
   }

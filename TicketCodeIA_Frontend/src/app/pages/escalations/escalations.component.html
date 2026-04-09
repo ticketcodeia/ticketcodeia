@@ -46,6 +46,9 @@
                 <button mat-button (click)="viewDetails(ticket)">
                   View Details
                 </button>
+                <button mat-raised-button color="primary" (click)="moveToHumanBoard(ticket)">
+                  Move to Human Board
+                </button>
                 <mat-form-field appearance="outline" class="resolve-select">
                   <mat-label>Resolve To</mat-label>
                   <mat-select (selectionChange)="resolveTicket(ticket, $event.value)">

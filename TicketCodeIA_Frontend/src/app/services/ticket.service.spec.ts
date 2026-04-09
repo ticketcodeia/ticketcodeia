@@ -119,9 +119,32 @@ describe('TicketService', () => {
     req.flush(mockTicket);
   });
 
+  it('should move ticket to human board', () => {
+    service.moveToHumanBoard(1).subscribe(ticket => {
+      expect(ticket.status).toBe(TicketStatus.HUMAN_TODO);
+    });
+
+    const req = httpTesting.expectOne('http://localhost:8080/api/tickets/1/move-to-human-board');
+    expect(req.request.method).toBe('POST');
+    req.flush({ ...mockTicket, status: TicketStatus.HUMAN_TODO });
+  });
+
+  it('should advance human board status', () => {
+    service.advanceHumanBoardStatus(1, TicketStatus.HUMAN_DEV).subscribe(ticket => {
+      expect(ticket.status).toBe(TicketStatus.HUMAN_DEV);
+    });
+
+    const req = httpTesting.expectOne(
+      'http://localhost:8080/api/tickets/1/human-board-status?status=HUMAN_DEV'
+    );
+    expect(req.request.method).toBe('PUT');
+    req.flush({ ...mockTicket, status: TicketStatus.HUMAN_DEV });
+  });
+
   it('should get stats', () => {
     const mockStats: TicketStats = {
-      total: 10, todo: 3, inProgress: 2, codeReview: 1, testing: 1, done: 2, escalated: 1
+      total: 10, todo: 3, inProgress: 2, codeReview: 1, testing: 1, done: 2, escalated: 1,
+      humanTodo: 0, humanDev: 0, humanReview: 0, humanTesting: 0
     };
 
     service.getStats().subscribe(stats => {

@@ -74,7 +74,36 @@ class TicketTest {
     }
 
     @Test
-    void isInFinalState_trueForDoneAndEscalated() {
+    void escalateToHuman_developer_setsHumanDev() {
+        Ticket ticket = Ticket.create("Title", "Desc", null, null, null);
+        ticket.escalateToHuman(AgentType.DEVELOPER, "dev failed");
+        assertThat(ticket.getStatus()).isEqualTo(TicketStatus.HUMAN_DEV);
+        assertThat(ticket.getAssignedAgent()).isEqualTo(AgentType.HUMAN);
+    }
+
+    @Test
+    void escalateToHuman_reviewer_setsHumanReview() {
+        Ticket ticket = Ticket.create("Title", "Desc", null, null, null);
+        ticket.escalateToHuman(AgentType.REVIEWER, "review failed");
+        assertThat(ticket.getStatus()).isEqualTo(TicketStatus.HUMAN_REVIEW);
+    }
+
+    @Test
+    void escalateToHuman_tester_setsHumanTesting() {
+        Ticket ticket = Ticket.create("Title", "Desc", null, null, null);
+        ticket.escalateToHuman(AgentType.TESTER, "tests failed");
+        assertThat(ticket.getStatus()).isEqualTo(TicketStatus.HUMAN_TESTING);
+    }
+
+    @Test
+    void escalateToHuman_default_setsHumanTodo() {
+        Ticket ticket = Ticket.create("Title", "Desc", null, null, null);
+        ticket.escalateToHuman(AgentType.HUMAN, "unknown issue");
+        assertThat(ticket.getStatus()).isEqualTo(TicketStatus.HUMAN_TODO);
+    }
+
+    @Test
+    void isInFinalState_trueForDoneAndEscalatedAndHumanBoard() {
         Ticket done = Ticket.create("T", "D", null, null, null);
         done.markDone("done");
         assertThat(done.isInFinalState()).isTrue();
@@ -82,6 +111,10 @@ class TicketTest {
         Ticket escalated = Ticket.create("T", "D", null, null, null);
         escalated.escalate("fail");
         assertThat(escalated.isInFinalState()).isTrue();
+
+        Ticket humanDev = Ticket.create("T", "D", null, null, null);
+        humanDev.escalateToHuman(AgentType.DEVELOPER, "dev failed");
+        assertThat(humanDev.isInFinalState()).isTrue();
     }
 
     @Test

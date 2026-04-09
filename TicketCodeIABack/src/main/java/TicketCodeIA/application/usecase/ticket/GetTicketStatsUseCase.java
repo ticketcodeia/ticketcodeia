@@ -22,7 +22,11 @@ public class GetTicketStatsUseCase {
                 ticketRepository.countByStatus(TicketStatus.CODE_REVIEW),
                 ticketRepository.countByStatus(TicketStatus.TESTING),
                 ticketRepository.countByStatus(TicketStatus.DONE),
-                ticketRepository.countByStatus(TicketStatus.ESCALATED)
+                ticketRepository.countByStatus(TicketStatus.ESCALATED),
+                ticketRepository.countByStatus(TicketStatus.HUMAN_TODO),
+                ticketRepository.countByStatus(TicketStatus.HUMAN_DEV),
+                ticketRepository.countByStatus(TicketStatus.HUMAN_REVIEW),
+                ticketRepository.countByStatus(TicketStatus.HUMAN_TESTING)
         );
     }
 }

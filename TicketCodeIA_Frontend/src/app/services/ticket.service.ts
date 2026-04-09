@@ -59,4 +59,12 @@ export class TicketService {
   getRecentActivity(): Observable<AgentLog[]> {
     return this.http.get<AgentLog[]>(`${this.apiUrl}/sse/recent-activity`);
   }
+
+  moveToHumanBoard(id: number): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.apiUrl}/tickets/${id}/move-to-human-board`, {});
+  }
+
+  advanceHumanBoardStatus(id: number, status: TicketStatus): Observable<Ticket> {
+    return this.http.put<Ticket>(`${this.apiUrl}/tickets/${id}/human-board-status?status=${status}`, {});
+  }
 }

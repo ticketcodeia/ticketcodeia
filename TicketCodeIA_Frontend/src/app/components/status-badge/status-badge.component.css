@@ -36,3 +36,23 @@
   background-color: #ffebee;
   color: #c62828;
 }
+
+.human-todo {
+  background-color: #e8eaf6;
+  color: #283593;
+}
+
+.human-dev {
+  background-color: #fce4ec;
+  color: #ad1457;
+}
+
+.human-review {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.human-testing {
+  background-color: #e0f7fa;
+  color: #00695c;
+}

@@ -30,6 +30,7 @@ public class TicketController {
     private final GetTicketStatsUseCase getTicketStatsUseCase;
     private final ProcessTicketUseCase processTicketUseCase;
     private final GetAgentLogsUseCase getAgentLogsUseCase;
+    private final MoveTicketOnHumanBoardUseCase moveTicketOnHumanBoardUseCase;
 
     @PostMapping
     public ResponseEntity<TicketResponse> createTicket(@RequestBody CreateTicketRequest request) {
@@ -76,6 +77,19 @@ public class TicketController {
         processTicketUseCase.executeAsync(id, request.isEnableCodeReview(), request.isEnableTesting());
         TicketResult result = getTicketUseCase.getById(id);
         return ResponseEntity.accepted().body(TicketResponse.fromResult(result));
+    }
+
+    @PostMapping("/{id}/move-to-human-board")
+    public ResponseEntity<TicketResponse> moveToHumanBoard(@PathVariable Long id) {
+        TicketResult result = moveTicketOnHumanBoardUseCase.moveToHumanBoard(id);
+        return ResponseEntity.ok(TicketResponse.fromResult(result));
+    }
+
+    @PutMapping("/{id}/human-board-status")
+    public ResponseEntity<TicketResponse> advanceHumanBoardStatus(
+            @PathVariable Long id, @RequestParam TicketStatus status) {
+        TicketResult result = moveTicketOnHumanBoardUseCase.advanceStatus(id, status);
+        return ResponseEntity.ok(TicketResponse.fromResult(result));
     }
 
     @GetMapping("/stats")

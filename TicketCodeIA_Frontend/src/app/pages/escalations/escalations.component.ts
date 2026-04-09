@@ -80,6 +80,23 @@ export class EscalationsComponent implements OnInit, OnDestroy {
     });
   }
 
+  moveToHumanBoard(ticket: Ticket): void {
+    this.ticketService.moveToHumanBoard(ticket.id).subscribe({
+      next: () => {
+        this.snackBar.open(`Ticket #${ticket.id} moved to Human Board`, 'Close', {
+          duration: 3000
+        });
+        this.loadEscalatedTickets();
+      },
+      error: (err) => {
+        console.error('Error moving ticket to human board:', err);
+        this.snackBar.open('Error moving ticket to human board', 'Close', {
+          duration: 3000
+        });
+      }
+    });
+  }
+
   resolveTicket(ticket: Ticket, newStatus: string): void {
     this.ticketService.updateTicket(ticket.id, {
       title: ticket.title,

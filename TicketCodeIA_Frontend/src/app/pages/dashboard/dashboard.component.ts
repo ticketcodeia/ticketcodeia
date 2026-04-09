@@ -32,7 +32,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     codeReview: 0,
     testing: 0,
     done: 0,
-    escalated: 0
+    escalated: 0,
+    humanTodo: 0,
+    humanDev: 0,
+    humanReview: 0,
+    humanTesting: 0
   });
 
   recentActivity = signal<AgentLog[]>([]);

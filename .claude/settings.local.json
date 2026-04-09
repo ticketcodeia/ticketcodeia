@@ -17,7 +17,8 @@
       "Bash(./mvnw clean:*)",
       "Bash(npm list:*)",
       "Bash(npm test:*)",
-      "Bash(npx ng:*)"
+      "Bash(npx ng:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }

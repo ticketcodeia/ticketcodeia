@@ -107,13 +107,83 @@ public class Ticket {
         addLog("Escalated: " + reason);
     }
 
+    public void escalateToHuman(AgentType failingAgent, String reason) {
+        this.assignedAgent = AgentType.HUMAN;
+        switch (failingAgent) {
+            case DEVELOPER -> {
+                this.status = TicketStatus.HUMAN_DEV;
+                addLog("Escalated to human developer: " + reason);
+            }
+            case REVIEWER -> {
+                this.status = TicketStatus.HUMAN_REVIEW;
+                addLog("Escalated to human reviewer: " + reason);
+            }
+            case TESTER -> {
+                this.status = TicketStatus.HUMAN_TESTING;
+                addLog("Escalated to human tester: " + reason);
+            }
+            default -> {
+                this.status = TicketStatus.HUMAN_TODO;
+                addLog("Escalated to human board: " + reason);
+            }
+        }
+    }
+
     public void markDone(String reason) {
         this.status = TicketStatus.DONE;
         addLog("Marked done: " + reason);
     }
 
     public boolean isInFinalState() {
-        return status == TicketStatus.DONE || status == TicketStatus.ESCALATED;
+        return status == TicketStatus.DONE || status == TicketStatus.ESCALATED || isOnHumanBoard();
+    }
+
+    public boolean isOnHumanBoard() {
+        return status == TicketStatus.HUMAN_TODO || status == TicketStatus.HUMAN_DEV
+                || status == TicketStatus.HUMAN_REVIEW || status == TicketStatus.HUMAN_TESTING;
+    }
+
+    // ── Human Board State Machine ────────────────────────────────────────────
+
+    public void moveToHumanBoard() {
+        if (this.status != TicketStatus.ESCALATED) {
+            throw new IllegalStateException("Only escalated tickets can be moved to human board. Current: " + status);
+        }
+        this.status = TicketStatus.HUMAN_TODO;
+        addLog("Moved to human board");
+    }
+
+    public void startHumanDevelopment() {
+        if (this.status != TicketStatus.HUMAN_TODO) {
+            throw new IllegalStateException("Cannot start human dev from status: " + status);
+        }
+        this.status = TicketStatus.HUMAN_DEV;
+        this.assignedAgent = AgentType.HUMAN;
+        addLog("Human developer started");
+    }
+
+    public void completeHumanDevelopment() {
+        if (this.status != TicketStatus.HUMAN_DEV) {
+            throw new IllegalStateException("Cannot complete human dev from status: " + status);
+        }
+        this.status = TicketStatus.HUMAN_REVIEW;
+        addLog("Human development completed, moved to review");
+    }
+
+    public void completeHumanReview() {
+        if (this.status != TicketStatus.HUMAN_REVIEW) {
+            throw new IllegalStateException("Cannot complete human review from status: " + status);
+        }
+        this.status = TicketStatus.HUMAN_TESTING;
+        addLog("Human review completed, moved to testing");
+    }
+
+    public void completeHumanTesting() {
+        if (this.status != TicketStatus.HUMAN_TESTING) {
+            throw new IllegalStateException("Cannot complete human testing from status: " + status);
+        }
+        this.status = TicketStatus.DONE;
+        addLog("Human testing completed, ticket done");
     }
 
     public boolean hasExceededRetries(int maxRetries) {

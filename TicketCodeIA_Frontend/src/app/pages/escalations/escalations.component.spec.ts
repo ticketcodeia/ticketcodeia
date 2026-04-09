@@ -85,4 +85,18 @@ describe('EscalationsComponent', () => {
     const h1 = fixture.nativeElement.querySelector('h1');
     expect(h1.textContent).toBe('Escalated Tickets');
   });
+
+  it('should move ticket to human board', () => {
+    fixture.detectChanges();
+    httpTesting.expectOne(r => r.url === 'http://localhost:8080/api/tickets').flush([escalatedTicket]);
+
+    component.moveToHumanBoard(escalatedTicket);
+
+    const req = httpTesting.expectOne('http://localhost:8080/api/tickets/1/move-to-human-board');
+    expect(req.request.method).toBe('POST');
+    req.flush({ ...escalatedTicket, status: TicketStatus.HUMAN_TODO });
+
+    // Should reload escalated tickets
+    httpTesting.expectOne(r => r.url === 'http://localhost:8080/api/tickets').flush([]);
+  });
 });

@@ -6,5 +6,9 @@ public enum TicketStatus {
     CODE_REVIEW,
     TESTING,
     DONE,
-    ESCALATED
+    ESCALATED,
+    HUMAN_TODO,
+    HUMAN_DEV,
+    HUMAN_REVIEW,
+    HUMAN_TESTING
 }

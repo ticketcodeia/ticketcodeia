@@ -27,11 +27,16 @@ class GetTicketStatsUseCaseTest {
         when(ticketRepository.countByStatus(TicketStatus.TESTING)).thenReturn(1L);
         when(ticketRepository.countByStatus(TicketStatus.DONE)).thenReturn(2L);
         when(ticketRepository.countByStatus(TicketStatus.ESCALATED)).thenReturn(1L);
+        when(ticketRepository.countByStatus(TicketStatus.HUMAN_TODO)).thenReturn(0L);
+        when(ticketRepository.countByStatus(TicketStatus.HUMAN_DEV)).thenReturn(0L);
+        when(ticketRepository.countByStatus(TicketStatus.HUMAN_REVIEW)).thenReturn(0L);
+        when(ticketRepository.countByStatus(TicketStatus.HUMAN_TESTING)).thenReturn(0L);
 
         TicketStatsResult result = useCase.execute();
 
         assertThat(result.total()).isEqualTo(10L);
         assertThat(result.todo()).isEqualTo(3L);
         assertThat(result.done()).isEqualTo(2L);
+        assertThat(result.humanTodo()).isEqualTo(0L);
     }
 }

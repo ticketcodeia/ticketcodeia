@@ -45,10 +45,10 @@ describe('BoardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have 6 columns', () => {
-    expect(component.columns.length).toBe(6);
+  it('should have 5 columns', () => {
+    expect(component.columns.length).toBe(5);
     expect(component.columns[0].title).toBe('To Do');
-    expect(component.columns[5].title).toBe('Escalated');
+    expect(component.columns[4].title).toBe('Done');
   });
 
   it('should load tickets and projects on init', () => {
@@ -74,7 +74,7 @@ describe('BoardComponent', () => {
     fixture.detectChanges();
 
     const columns = fixture.nativeElement.querySelectorAll('.column');
-    expect(columns.length).toBe(6);
+    expect(columns.length).toBe(5);
   });
 
   it('should display board header with title', () => {
@@ -83,7 +83,7 @@ describe('BoardComponent', () => {
     httpTesting.expectOne('http://localhost:8080/api/tickets').flush([]);
 
     const h1 = fixture.nativeElement.querySelector('h1');
-    expect(h1.textContent).toBe('Kanban Board');
+    expect(h1.textContent).toBe('Agent Board');
   });
 
   it('should reload tickets on project change', () => {

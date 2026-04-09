@@ -158,9 +158,9 @@ public class ProcessTicketUseCase {
         if (ticket.getStatus() == TicketStatus.DONE) {
             logAgent(ticket.getId(), AgentType.HUMAN, "PIPELINE_COMPLETED", "Ticket completed successfully");
             eventPublisher.publish(new TicketCompletedEvent(ticket.getId(), "Ticket completed successfully"));
-        } else if (ticket.getStatus() == TicketStatus.ESCALATED) {
-            logAgent(ticket.getId(), AgentType.HUMAN, "ESCALATED", "Ticket escalated");
-            eventPublisher.publish(new TicketEscalatedEvent(ticket.getId(), "Ticket escalated"));
+        } else if (ticket.getStatus() == TicketStatus.ESCALATED || ticket.isOnHumanBoard()) {
+            logAgent(ticket.getId(), AgentType.HUMAN, "ESCALATED_TO_HUMAN", "Ticket escalated to human board");
+            eventPublisher.publish(new TicketEscalatedEvent(ticket.getId(), "Ticket escalated to human board"));
         }
     }
 
@@ -171,9 +171,10 @@ public class ProcessTicketUseCase {
 
     private void doEscalate(Ticket ticket, String reason) {
         log.warn("Orchestrator: Escalating ticket {} - {}", ticket.getId(), reason);
-        ticket.escalate(reason);
+        AgentType failingAgent = ticket.getAssignedAgent() != null ? ticket.getAssignedAgent() : AgentType.HUMAN;
+        ticket.escalateToHuman(failingAgent, reason);
         ticketRepository.save(ticket);
-        logAgent(ticket.getId(), AgentType.HUMAN, "ESCALATED", reason);
+        logAgent(ticket.getId(), AgentType.HUMAN, "ESCALATED_TO_HUMAN", reason);
         eventPublisher.publish(new TicketEscalatedEvent(ticket.getId(), reason));
     }
 

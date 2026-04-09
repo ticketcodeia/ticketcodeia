@@ -4,7 +4,11 @@ export enum TicketStatus {
   CODE_REVIEW = 'CODE_REVIEW',
   TESTING = 'TESTING',
   DONE = 'DONE',
-  ESCALATED = 'ESCALATED'
+  ESCALATED = 'ESCALATED',
+  HUMAN_TODO = 'HUMAN_TODO',
+  HUMAN_DEV = 'HUMAN_DEV',
+  HUMAN_REVIEW = 'HUMAN_REVIEW',
+  HUMAN_TESTING = 'HUMAN_TESTING'
 }
 
 export enum Priority {
@@ -66,6 +70,10 @@ export interface TicketStats {
   testing: number;
   done: number;
   escalated: number;
+  humanTodo: number;
+  humanDev: number;
+  humanReview: number;
+  humanTesting: number;
 }
 
 export interface RequirementsRequest {

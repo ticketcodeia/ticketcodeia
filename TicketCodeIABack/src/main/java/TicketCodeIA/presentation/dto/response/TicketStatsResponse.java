@@ -18,6 +18,10 @@ public class TicketStatsResponse {
     private long testing;
     private long done;
     private long escalated;
+    private long humanTodo;
+    private long humanDev;
+    private long humanReview;
+    private long humanTesting;
 
     public static TicketStatsResponse fromResult(TicketStatsResult result) {
         return TicketStatsResponse.builder()
@@ -28,6 +32,10 @@ public class TicketStatsResponse {
                 .testing(result.testing())
                 .done(result.done())
                 .escalated(result.escalated())
+                .humanTodo(result.humanTodo())
+                .humanDev(result.humanDev())
+                .humanReview(result.humanReview())
+                .humanTesting(result.humanTesting())
                 .build();
     }
 }

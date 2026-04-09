@@ -78,4 +78,36 @@ describe('StatusBadgeComponent', () => {
     expect(badge.textContent.trim()).toBe('Escalated');
     expect(badge.classList.contains('escalated')).toBe(true);
   });
+
+  it('should display "Human Todo" for HUMAN_TODO status', () => {
+    host.status = TicketStatus.HUMAN_TODO;
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('.status-badge');
+    expect(badge.textContent.trim()).toBe('Human Todo');
+    expect(badge.classList.contains('human-todo')).toBe(true);
+  });
+
+  it('should display "Human Dev" for HUMAN_DEV status', () => {
+    host.status = TicketStatus.HUMAN_DEV;
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('.status-badge');
+    expect(badge.textContent.trim()).toBe('Human Dev');
+    expect(badge.classList.contains('human-dev')).toBe(true);
+  });
+
+  it('should display "Human Review" for HUMAN_REVIEW status', () => {
+    host.status = TicketStatus.HUMAN_REVIEW;
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('.status-badge');
+    expect(badge.textContent.trim()).toBe('Human Review');
+    expect(badge.classList.contains('human-review')).toBe(true);
+  });
+
+  it('should display "Human Testing" for HUMAN_TESTING status', () => {
+    host.status = TicketStatus.HUMAN_TESTING;
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('.status-badge');
+    expect(badge.textContent.trim()).toBe('Human Testing');
+    expect(badge.classList.contains('human-testing')).toBe(true);
+  });
 });

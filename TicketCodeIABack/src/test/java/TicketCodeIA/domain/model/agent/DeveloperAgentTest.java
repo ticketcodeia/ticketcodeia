@@ -56,7 +56,7 @@ class DeveloperAgentTest {
         boolean shouldContinue = agent.applyResult(ticket, AgentResult.failure("error"), true, true);
 
         assertThat(shouldContinue).isFalse();
-        assertThat(ticket.getStatus()).isEqualTo(TicketStatus.ESCALATED);
+        assertThat(ticket.getStatus()).isEqualTo(TicketStatus.HUMAN_DEV);
     }
 
     @Test

@@ -29,7 +29,7 @@ public class ReviewerAgent extends Agent {
     @Override
     public boolean applyResult(Ticket ticket, AgentResult result, boolean enableCodeReview, boolean enableTesting) {
         if (result.isFailure()) {
-            ticket.escalate("Review failed: " + result.getMessage());
+            ticket.escalateToHuman(getType(), "Review failed: " + result.getMessage());
             return false;
         }
 

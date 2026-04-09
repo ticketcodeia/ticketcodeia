@@ -19,7 +19,11 @@ export class StatusBadgeComponent {
       [TicketStatus.CODE_REVIEW]: 'code-review',
       [TicketStatus.TESTING]: 'testing',
       [TicketStatus.DONE]: 'done',
-      [TicketStatus.ESCALATED]: 'escalated'
+      [TicketStatus.ESCALATED]: 'escalated',
+      [TicketStatus.HUMAN_TODO]: 'human-todo',
+      [TicketStatus.HUMAN_DEV]: 'human-dev',
+      [TicketStatus.HUMAN_REVIEW]: 'human-review',
+      [TicketStatus.HUMAN_TESTING]: 'human-testing'
     };
     return statusMap[this.status()] || 'todo';
   });
@@ -31,7 +35,11 @@ export class StatusBadgeComponent {
       [TicketStatus.CODE_REVIEW]: 'Code Review',
       [TicketStatus.TESTING]: 'Testing',
       [TicketStatus.DONE]: 'Done',
-      [TicketStatus.ESCALATED]: 'Escalated'
+      [TicketStatus.ESCALATED]: 'Escalated',
+      [TicketStatus.HUMAN_TODO]: 'Human Todo',
+      [TicketStatus.HUMAN_DEV]: 'Human Dev',
+      [TicketStatus.HUMAN_REVIEW]: 'Human Review',
+      [TicketStatus.HUMAN_TESTING]: 'Human Testing'
     };
     return labelMap[this.status()] || this.status();
   });

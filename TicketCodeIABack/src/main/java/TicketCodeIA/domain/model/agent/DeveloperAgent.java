@@ -30,7 +30,7 @@ public class DeveloperAgent extends Agent {
     @Override
     public boolean applyResult(Ticket ticket, AgentResult result, boolean enableCodeReview, boolean enableTesting) {
         if (result.isFailure()) {
-            ticket.escalate("Development failed: " + result.getMessage());
+            ticket.escalateToHuman(getType(), "Development failed: " + result.getMessage());
             return false;
         }
 

@@ -7,5 +7,9 @@ public record TicketStatsResult(
         long codeReview,
         long testing,
         long done,
-        long escalated
+        long escalated,
+        long humanTodo,
+        long humanDev,
+        long humanReview,
+        long humanTesting
 ) {}
