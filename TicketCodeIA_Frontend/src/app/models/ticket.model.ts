@@ -60,6 +60,7 @@ export interface TicketRequest {
   description: string;
   priority?: Priority;
   status?: TicketStatus;
+  projectId?: number | null;
 }
 
 export interface TicketStats {

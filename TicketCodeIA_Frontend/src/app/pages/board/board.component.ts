@@ -126,7 +126,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result?.processed) {
+      if (result?.processed || result?.deleted) {
         this.loadTickets();
       }
     });

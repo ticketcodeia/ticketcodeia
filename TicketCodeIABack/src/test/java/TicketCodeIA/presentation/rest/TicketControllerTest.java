@@ -36,6 +36,7 @@ class TicketControllerTest {
     @MockBean private GetTicketStatsUseCase getTicketStatsUseCase;
     @MockBean private ProcessTicketUseCase processTicketUseCase;
     @MockBean private GetAgentLogsUseCase getAgentLogsUseCase;
+    @MockBean private DeleteTicketUseCase deleteTicketUseCase;
     @MockBean private MoveTicketOnHumanBoardUseCase moveTicketOnHumanBoardUseCase;
     @MockBean private ProcessProjectUseCase processProjectUseCase;
 

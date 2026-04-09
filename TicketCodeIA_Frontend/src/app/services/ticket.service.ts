@@ -36,6 +36,10 @@ export class TicketService {
     return this.http.put<Ticket>(`${this.apiUrl}/tickets/${id}`, request);
   }
 
+  deleteTicket(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/tickets/${id}`);
+  }
+
   processTicket(id: number, enableCodeReview = true, enableTesting = true): Observable<Ticket> {
     return this.http.post<Ticket>(`${this.apiUrl}/tickets/${id}/process`, {
       enableCodeReview,

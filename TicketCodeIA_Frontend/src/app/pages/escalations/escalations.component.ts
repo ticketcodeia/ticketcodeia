@@ -74,9 +74,15 @@ export class EscalationsComponent implements OnInit, OnDestroy {
   }
 
   viewDetails(ticket: Ticket): void {
-    this.dialog.open(TicketDialogComponent, {
+    const dialogRef = this.dialog.open(TicketDialogComponent, {
       width: '600px',
       data: ticket
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.deleted) {
+        this.loadEscalatedTickets();
+      }
     });
   }
 

@@ -38,7 +38,7 @@ describe('RequirementsComponent', () => {
     httpTesting.expectOne('http://localhost:8080/api/projects').flush([]);
 
     const h1 = fixture.nativeElement.querySelector('h1');
-    expect(h1.textContent).toBe('Requirements Input');
+    expect(h1.textContent).toBe('Create Tickets');
   });
 
   it('should start with empty requirements', () => {
@@ -74,6 +74,6 @@ describe('RequirementsComponent', () => {
     httpTesting.expectOne('http://localhost:8080/api/projects').flush([]);
 
     const subtitle = fixture.nativeElement.querySelector('.subtitle');
-    expect(subtitle.textContent).toContain('PO Agent');
+    expect(subtitle.textContent).toContain('AI');
   });
 });

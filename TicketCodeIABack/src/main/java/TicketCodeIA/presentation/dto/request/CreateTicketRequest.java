@@ -12,4 +12,5 @@ public class CreateTicketRequest {
     private String title;
     private String description;
     private Priority priority;
+    private Long projectId;
 }

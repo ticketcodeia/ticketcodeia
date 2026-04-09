@@ -1,6 +1,6 @@
 <div class="requirements-container">
-  <h1>Requirements Input</h1>
-  <p class="subtitle">Select a project, enter requirements, and let the PO Agent generate tickets.</p>
+  <h1>Create Tickets</h1>
+  <p class="subtitle">Generate tickets with AI or create them manually.</p>
 
   <!-- Project selector -->
   <mat-card class="project-card">
@@ -42,40 +42,104 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Requirements input -->
-  <mat-card class="input-card">
-    <mat-card-content>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Requirements</mat-label>
-        <textarea
-          matInput
-          [(ngModel)]="requirements"
-          placeholder="Enter your requirements here. Be as detailed as possible..."
-          rows="10">
-        </textarea>
-      </mat-form-field>
+  <!-- Tabs: AI Generate / Manual Create -->
+  <mat-tab-group [(selectedIndex)]="activeTab" class="creation-tabs">
+    <!-- Tab 1: Generate with AI -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">auto_awesome</mat-icon>
+        Generate with AI
+      </ng-template>
 
-      <div class="actions">
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="generateTickets()"
-          [disabled]="generating() || !requirements.trim()">
-          @if (generating()) {
-            <mat-spinner diameter="20" />
-            <span>Generating...</span>
-          } @else {
-            <mat-icon>auto_awesome</mat-icon>
-            <span>Generate Tickets</span>
-          }
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
+      <mat-card class="tab-content-card">
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Requirements</mat-label>
+            <textarea
+              matInput
+              [(ngModel)]="requirements"
+              placeholder="Enter your requirements here. Be as detailed as possible..."
+              rows="10">
+            </textarea>
+          </mat-form-field>
 
+          <div class="actions">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="generateTickets()"
+              [disabled]="generating() || !requirements.trim()">
+              @if (generating()) {
+                <mat-spinner diameter="20" />
+                <span>Generating...</span>
+              } @else {
+                <mat-icon>auto_awesome</mat-icon>
+                <span>Generate Tickets</span>
+              }
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+
+    <!-- Tab 2: Create Manually -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">edit</mat-icon>
+        Create Manually
+      </ng-template>
+
+      <mat-card class="tab-content-card">
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="manualTitle" placeholder="Ticket title" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea
+              matInput
+              [(ngModel)]="manualDescription"
+              placeholder="Describe what needs to be done..."
+              rows="6">
+            </textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Priority</mat-label>
+            <mat-select [(ngModel)]="manualPriority">
+              <mat-option value="LOW">Low</mat-option>
+              <mat-option value="MEDIUM">Medium</mat-option>
+              <mat-option value="HIGH">High</mat-option>
+              <mat-option value="CRITICAL">Critical</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="actions">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="createManualTicket()"
+              [disabled]="creatingTicket() || !manualTitle.trim()">
+              @if (creatingTicket()) {
+                <mat-spinner diameter="20" />
+                <span>Creating...</span>
+              } @else {
+                <mat-icon>add_circle</mat-icon>
+                <span>Create Ticket</span>
+              }
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Generated / Created tickets -->
   @if (generatedTickets().length > 0) {
     <div class="generated-section">
-      <h2>Generated Tickets ({{ generatedTickets().length }})</h2>
+      <h2>{{ activeTab === 0 ? 'Generated' : 'Created' }} Tickets ({{ generatedTickets().length }})</h2>
       <div class="tickets-list">
         @for (ticket of generatedTickets(); track ticket.id) {
           <mat-card class="ticket-card">

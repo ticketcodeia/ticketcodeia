@@ -42,9 +42,9 @@ public class DeveloperAgentAdapter implements DeveloperAgentPort {
 							+ "Create the necessary files with clean code. Save all files in the current directory.",
 					ticket.getTitle(), ticket.getDescription());
 
-			ProcessBuilder pb = new ProcessBuilder(claudeExe, "-p", claudePrompt, "--output-format", "text",
-					"--max-turns", String.valueOf(cliHelper.getMaxTurns()), "--allowedTools", "Read,Write,Edit,Bash",
-					"--dangerously-skip-permissions");
+			ProcessBuilder pb = new ProcessBuilder(claudeExe, "-p", "--model", cliHelper.getModel(), claudePrompt,
+					"--output-format", "text", "--max-turns", String.valueOf(cliHelper.getMaxTurns()), "--allowedTools",
+					"Read,Write,Edit,Bash", "--dangerously-skip-permissions");
 			pb.directory(workspace);
 			pb.redirectErrorStream(true);
 			pb.environment().putAll(System.getenv());

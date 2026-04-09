@@ -10,9 +10,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
 import { TicketService } from '../../services/ticket.service';
 import { ProjectService } from '../../services/project.service';
-import { Ticket, Project } from '../../models/ticket.model';
+import { Ticket, Project, Priority } from '../../models/ticket.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 
 @Component({
@@ -30,6 +31,7 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatDividerModule,
+    MatTabsModule,
     StatusBadgeComponent
   ],
   templateUrl: './requirements.component.html',
@@ -48,9 +50,18 @@ export class RequirementsComponent implements OnInit {
   newProjectDescription = '';
   creatingProject = signal(false);
 
+  activeTab = 0;
+
+  // AI generation
   requirements = '';
   generating = signal(false);
   generatedTickets = signal<Ticket[]>([]);
+
+  // Manual creation
+  manualTitle = '';
+  manualDescription = '';
+  manualPriority: Priority = Priority.MEDIUM;
+  creatingTicket = signal(false);
 
   ngOnInit(): void {
     this.loadProjects();
@@ -131,6 +142,32 @@ export class RequirementsComponent implements OnInit {
         console.error('Error generating tickets:', err);
         this.generating.set(false);
         this.snackBar.open('Error generating tickets', 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  createManualTicket(): void {
+    if (!this.manualTitle.trim()) return;
+
+    this.creatingTicket.set(true);
+    this.ticketService.createTicket({
+      title: this.manualTitle.trim(),
+      description: this.manualDescription.trim(),
+      priority: this.manualPriority,
+      projectId: this.selectedProjectId
+    }).subscribe({
+      next: (ticket) => {
+        this.generatedTickets.update(list => [...list, ticket]);
+        this.manualTitle = '';
+        this.manualDescription = '';
+        this.manualPriority = Priority.MEDIUM;
+        this.creatingTicket.set(false);
+        this.snackBar.open('Ticket created!', 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        console.error('Error creating ticket:', err);
+        this.creatingTicket.set(false);
+        this.snackBar.open('Error creating ticket', 'Close', { duration: 5000 });
       }
     });
   }

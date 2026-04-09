@@ -36,6 +36,7 @@ export class TicketDialogComponent {
   private readonly ticketService = inject(TicketService);
 
   processing = signal(false);
+  deleting = signal(false);
   enableCodeReview = this.data.enableCodeReview;
   enableTesting = this.data.enableTesting;
 
@@ -49,6 +50,20 @@ export class TicketDialogComponent {
     if (this.enableCodeReview) return 'Pipeline: Dev → Code Review → Done (testing skipped)' + editNote;
     if (this.enableTesting) return 'Pipeline: Dev → Testing → Done (review skipped)' + editNote;
     return 'Pipeline: Dev → Done (review and testing skipped)' + editNote;
+  }
+
+  deleteTicket(): void {
+    this.deleting.set(true);
+    this.ticketService.deleteTicket(this.data.id).subscribe({
+      next: () => {
+        this.deleting.set(false);
+        this.dialogRef.close({ deleted: true });
+      },
+      error: (err) => {
+        console.error('Error deleting ticket:', err);
+        this.deleting.set(false);
+      }
+    });
   }
 
   processTicket(): void {

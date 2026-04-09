@@ -96,4 +96,9 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
     public long countByProjectIdAndStatusIn(Long projectId, List<TicketStatus> statuses) {
         return jpaRepository.countByProjectIdAndStatusIn(projectId, statuses);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
+    }
 }

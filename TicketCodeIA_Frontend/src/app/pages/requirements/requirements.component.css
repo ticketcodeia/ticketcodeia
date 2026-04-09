@@ -11,7 +11,7 @@ h1 { margin-bottom: 8px; }
   margin-bottom: 24px;
 }
 
-.project-card, .input-card {
+.project-card {
   margin-bottom: 24px;
 }
 
@@ -39,6 +39,18 @@ h3 {
 }
 
 .full-width { width: 100%; }
+
+.creation-tabs {
+  margin-bottom: 24px;
+}
+
+.tab-icon {
+  margin-right: 8px;
+}
+
+.tab-content-card {
+  margin-top: 16px;
+}
 
 .actions {
   display: flex;

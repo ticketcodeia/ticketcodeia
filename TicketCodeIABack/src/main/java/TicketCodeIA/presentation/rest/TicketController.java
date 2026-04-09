@@ -30,13 +30,14 @@ public class TicketController {
     private final GetTicketStatsUseCase getTicketStatsUseCase;
     private final ProcessTicketUseCase processTicketUseCase;
     private final GetAgentLogsUseCase getAgentLogsUseCase;
+    private final DeleteTicketUseCase deleteTicketUseCase;
     private final MoveTicketOnHumanBoardUseCase moveTicketOnHumanBoardUseCase;
     private final ProcessProjectUseCase processProjectUseCase;
 
     @PostMapping
     public ResponseEntity<TicketResponse> createTicket(@RequestBody CreateTicketRequest request) {
         var command = new CreateTicketCommand(
-                request.getTitle(), request.getDescription(), request.getPriority(), null);
+                request.getTitle(), request.getDescription(), request.getPriority(), request.getProjectId());
         TicketResult result = createTicketUseCase.execute(command);
         return ResponseEntity.ok(TicketResponse.fromResult(result));
     }
@@ -65,6 +66,12 @@ public class TicketController {
                 request.getPriority(), request.getStatus());
         TicketResult result = updateTicketUseCase.execute(command);
         return ResponseEntity.ok(TicketResponse.fromResult(result));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
+        deleteTicketUseCase.execute(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/process")

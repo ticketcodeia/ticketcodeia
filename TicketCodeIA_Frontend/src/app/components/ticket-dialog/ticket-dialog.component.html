@@ -71,6 +71,15 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
+  <button
+    mat-raised-button
+    color="warn"
+    (click)="deleteTicket()"
+    [disabled]="deleting()"
+    class="delete-btn">
+    {{ deleting() ? 'Deleting...' : 'Delete' }}
+  </button>
+  <span class="spacer"></span>
   @if (data.status !== 'DONE' && data.status !== 'ESCALATED') {
     <button
       mat-raised-button

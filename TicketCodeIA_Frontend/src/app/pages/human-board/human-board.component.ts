@@ -111,9 +111,15 @@ export class HumanBoardComponent implements OnInit, OnDestroy {
   }
 
   openTicketDialog(ticket: Ticket): void {
-    this.dialog.open(TicketDialogComponent, {
+    const dialogRef = this.dialog.open(TicketDialogComponent, {
       width: '600px',
       data: ticket
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.deleted) {
+        this.loadTickets();
+      }
     });
   }
 

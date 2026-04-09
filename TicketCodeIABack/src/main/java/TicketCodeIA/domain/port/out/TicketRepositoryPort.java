@@ -31,4 +31,6 @@ public interface TicketRepositoryPort {
     long countByStatus(TicketStatus status);
 
     long countByProjectIdAndStatusIn(Long projectId, List<TicketStatus> statuses);
+
+    void deleteById(Long id);
 }

@@ -83,3 +83,11 @@ mat-divider {
   color: #888;
   font-style: italic;
 }
+
+.spacer {
+  flex: 1;
+}
+
+.delete-btn {
+  margin-right: auto;
+}

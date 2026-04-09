@@ -21,6 +21,8 @@ public class ClaudeCliHelper {
 
 	@Value("${tickcode.agents.claude-code-max-turns}")
 	private int maxTurns;
+	@Value("${claude.cli.model}")
+	private String model;
 
 	public String getWorkspacePath() {
 		return workspacePath;
@@ -28,6 +30,10 @@ public class ClaudeCliHelper {
 
 	public int getMaxTurns() {
 		return maxTurns;
+	}
+
+	public String getModel() {
+		return model;
 	}
 
 	public String findClaudeExecutable() {
