@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TicketService } from '../../services/ticket.service';
 import { ProjectService } from '../../services/project.service';
 import { SseService } from '../../services/sse.service';
@@ -33,6 +34,7 @@ interface Column {
     MatDialogModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatSnackBarModule,
     StatusBadgeComponent,
     AgentAvatarComponent
   ],
@@ -43,11 +45,13 @@ export class BoardComponent implements OnInit, OnDestroy {
   private readonly ticketService = inject(TicketService);
   private readonly projectService = inject(ProjectService);
   private readonly sseService = inject(SseService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
   tickets = signal<Ticket[]>([]);
   projects = signal<Project[]>([]);
   selectedProjectId: number | null = null;
+  processingProject = signal(false);
 
   columns: Column[] = [
     { status: TicketStatus.TODO, title: 'To Do', color: '#1565c0' },
@@ -88,6 +92,31 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   getTicketsByStatus(status: TicketStatus): Ticket[] {
     return this.tickets().filter(t => t.status === status);
+  }
+
+  canStartProject(): boolean {
+    if (!this.selectedProjectId || this.processingProject()) return false;
+    const hasTodo = this.getTicketsByStatus(TicketStatus.TODO).length > 0;
+    const hasActive =
+      this.getTicketsByStatus(TicketStatus.IN_PROGRESS).length > 0 ||
+      this.getTicketsByStatus(TicketStatus.CODE_REVIEW).length > 0 ||
+      this.getTicketsByStatus(TicketStatus.TESTING).length > 0;
+    return hasTodo && !hasActive;
+  }
+
+  startProject(): void {
+    if (!this.selectedProjectId) return;
+    this.processingProject.set(true);
+    this.ticketService.processProject(this.selectedProjectId).subscribe({
+      next: () => {
+        this.snackBar.open('Project pipeline started', 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        console.error('Error starting project:', err);
+        this.snackBar.open('Error starting project pipeline', 'Close', { duration: 3000 });
+        this.processingProject.set(false);
+      }
+    });
   }
 
   openTicketDialog(ticket: Ticket): void {

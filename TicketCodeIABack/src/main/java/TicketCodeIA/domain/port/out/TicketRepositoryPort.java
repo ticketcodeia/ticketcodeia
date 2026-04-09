@@ -29,4 +29,6 @@ public interface TicketRepositoryPort {
     long count();
 
     long countByStatus(TicketStatus status);
+
+    long countByProjectIdAndStatusIn(Long projectId, List<TicketStatus> statuses);
 }

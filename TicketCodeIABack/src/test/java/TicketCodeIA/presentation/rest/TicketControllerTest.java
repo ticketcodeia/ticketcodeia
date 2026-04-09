@@ -37,6 +37,7 @@ class TicketControllerTest {
     @MockBean private ProcessTicketUseCase processTicketUseCase;
     @MockBean private GetAgentLogsUseCase getAgentLogsUseCase;
     @MockBean private MoveTicketOnHumanBoardUseCase moveTicketOnHumanBoardUseCase;
+    @MockBean private ProcessProjectUseCase processProjectUseCase;
 
     private TicketResult sampleResult(Long id) {
         return new TicketResult(id, "Title " + id, "Desc", TicketStatus.TODO, Priority.MEDIUM,

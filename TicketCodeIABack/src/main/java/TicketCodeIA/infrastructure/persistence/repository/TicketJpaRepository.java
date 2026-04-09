@@ -13,17 +13,28 @@ import java.util.Optional;
 @Repository
 public interface TicketJpaRepository extends JpaRepository<TicketJpaEntity, Long> {
 
-    List<TicketJpaEntity> findByStatus(TicketStatus status);
+    @Query("SELECT t FROM TicketJpaEntity t LEFT JOIN FETCH t.project")
+    List<TicketJpaEntity> findAllWithProject();
 
-    List<TicketJpaEntity> findByProjectId(Long projectId);
+    @Query("SELECT t FROM TicketJpaEntity t LEFT JOIN FETCH t.project WHERE t.status = :status")
+    List<TicketJpaEntity> findByStatus(@Param("status") TicketStatus status);
 
-    List<TicketJpaEntity> findByProjectIdAndStatus(Long projectId, TicketStatus status);
+    @Query("SELECT t FROM TicketJpaEntity t LEFT JOIN FETCH t.project WHERE t.project.id = :projectId")
+    List<TicketJpaEntity> findByProjectId(@Param("projectId") Long projectId);
+
+    @Query("SELECT t FROM TicketJpaEntity t LEFT JOIN FETCH t.project WHERE t.project.id = :projectId AND t.status = :status")
+    List<TicketJpaEntity> findByProjectIdAndStatus(@Param("projectId") Long projectId, @Param("status") TicketStatus status);
 
     long countByStatus(TicketStatus status);
 
+    @Query("SELECT COUNT(t) FROM TicketJpaEntity t WHERE t.project.id = :projectId AND t.status IN :statuses")
+    long countByProjectIdAndStatusIn(@Param("projectId") Long projectId, @Param("statuses") List<TicketStatus> statuses);
+
+    @Query("SELECT t FROM TicketJpaEntity t LEFT JOIN FETCH t.project ORDER BY t.createdAt DESC")
     List<TicketJpaEntity> findAllByOrderByCreatedAtDesc();
 
-    List<TicketJpaEntity> findByProjectIdOrderByCreatedAtDesc(Long projectId);
+    @Query("SELECT t FROM TicketJpaEntity t LEFT JOIN FETCH t.project WHERE t.project.id = :projectId ORDER BY t.createdAt DESC")
+    List<TicketJpaEntity> findByProjectIdOrderByCreatedAtDesc(@Param("projectId") Long projectId);
 
     @Query("SELECT t FROM TicketJpaEntity t LEFT JOIN FETCH t.project WHERE t.id = :id")
     Optional<TicketJpaEntity> findByIdWithProject(@Param("id") Long id);

@@ -67,4 +67,11 @@ export class TicketService {
   advanceHumanBoardStatus(id: number, status: TicketStatus): Observable<Ticket> {
     return this.http.put<Ticket>(`${this.apiUrl}/tickets/${id}/human-board-status?status=${status}`, {});
   }
+
+  processProject(projectId: number): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/tickets/process-project?projectId=${projectId}`,
+      {}
+    );
+  }
 }

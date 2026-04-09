@@ -52,7 +52,7 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
 
     @Override
     public List<Ticket> findAll() {
-        return jpaRepository.findAll().stream().map(mapper::toDomain).toList();
+        return jpaRepository.findAllWithProject().stream().map(mapper::toDomain).toList();
     }
 
     @Override
@@ -90,5 +90,10 @@ public class TicketRepositoryAdapter implements TicketRepositoryPort {
     @Override
     public long countByStatus(TicketStatus status) {
         return jpaRepository.countByStatus(status);
+    }
+
+    @Override
+    public long countByProjectIdAndStatusIn(Long projectId, List<TicketStatus> statuses) {
+        return jpaRepository.countByProjectIdAndStatusIn(projectId, statuses);
     }
 }

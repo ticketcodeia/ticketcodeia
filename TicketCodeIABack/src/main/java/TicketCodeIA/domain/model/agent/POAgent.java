@@ -33,9 +33,19 @@ public class POAgent {
             String title = data.getOrDefault("title", "Untitled");
             String description = data.getOrDefault("description", "");
             Priority priority = parsePriority(data.get("priority"));
-            tickets.add(Ticket.create(title, description, priority, projectId, projectName));
+            boolean enableCodeReview = parseBoolean(data.get("enableCodeReview"), false);
+            boolean enableTesting = parseBoolean(data.get("enableTesting"), false);
+            Ticket ticket = Ticket.create(title, description, priority, projectId, projectName);
+            ticket.setEnableCodeReview(enableCodeReview);
+            ticket.setEnableTesting(enableTesting);
+            tickets.add(ticket);
         }
         return tickets;
+    }
+
+    private boolean parseBoolean(String value, boolean defaultValue) {
+        if (value == null || value.isBlank()) return defaultValue;
+        return "true".equalsIgnoreCase(value.trim());
     }
 
     private Priority parsePriority(String priorityStr) {

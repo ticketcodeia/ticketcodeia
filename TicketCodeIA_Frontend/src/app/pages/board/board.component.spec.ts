@@ -98,4 +98,44 @@ describe('BoardComponent', () => {
     expect(req.request.params.get('projectId')).toBe('5');
     req.flush([]);
   });
+
+  it('should not allow start project without project selected', () => {
+    component.selectedProjectId = null;
+    expect(component.canStartProject()).toBe(false);
+  });
+
+  it('should not allow start project when no TODO tickets', () => {
+    component.selectedProjectId = 1;
+    component.tickets.set([]);
+    expect(component.canStartProject()).toBe(false);
+  });
+
+  it('should not allow start project when active tickets exist', () => {
+    component.selectedProjectId = 1;
+    component.tickets.set(mockTickets); // has IN_PROGRESS
+    expect(component.canStartProject()).toBe(false);
+  });
+
+  it('should allow start project with TODO tickets and no active ones', () => {
+    component.selectedProjectId = 1;
+    component.tickets.set([mockTickets[0]]); // only TODO
+    expect(component.canStartProject()).toBe(true);
+  });
+
+  it('should call processProject on startProject', () => {
+    fixture.detectChanges();
+    httpTesting.expectOne('http://localhost:8080/api/projects').flush([]);
+    httpTesting.expectOne('http://localhost:8080/api/tickets').flush([]);
+
+    component.selectedProjectId = 5;
+    component.startProject();
+
+    const req = httpTesting.expectOne(r =>
+      r.url.includes('process-project') && r.url.includes('projectId=5')
+    );
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+
+    expect(component.processingProject()).toBe(true);
+  });
 });

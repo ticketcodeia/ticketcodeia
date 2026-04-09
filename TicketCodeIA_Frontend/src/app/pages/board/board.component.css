@@ -22,6 +22,10 @@
   margin-bottom: -1.25em;
 }
 
+.start-project-btn {
+  height: 40px;
+}
+
 .board {
   display: flex;
   gap: 16px;

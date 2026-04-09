@@ -57,5 +57,24 @@ class POAgentTest {
         assertThat(tickets).hasSize(1);
         assertThat(tickets.get(0).getTitle()).isEqualTo("Untitled");
         assertThat(tickets.get(0).getPriority()).isEqualTo(Priority.MEDIUM);
+        assertThat(tickets.get(0).isEnableCodeReview()).isFalse();
+        assertThat(tickets.get(0).isEnableTesting()).isFalse();
+    }
+
+    @Test
+    void createTicketsFromData_parsesAgentFlags() {
+        List<Map<String, String>> data = List.of(
+                Map.of("title", "Task", "description", "Desc", "priority", "HIGH",
+                        "enableCodeReview", "true", "enableTesting", "true"),
+                Map.of("title", "Task2", "description", "Desc2", "priority", "LOW",
+                        "enableCodeReview", "false", "enableTesting", "false")
+        );
+
+        List<Ticket> tickets = agent.createTicketsFromData(data, 1L, "Proj");
+
+        assertThat(tickets.get(0).isEnableCodeReview()).isTrue();
+        assertThat(tickets.get(0).isEnableTesting()).isTrue();
+        assertThat(tickets.get(1).isEnableCodeReview()).isFalse();
+        assertThat(tickets.get(1).isEnableTesting()).isFalse();
     }
 }
