@@ -3,7 +3,7 @@ package TicketCodeIA.application.usecase.ticket;
 import TicketCodeIA.domain.enums.Priority;
 import TicketCodeIA.domain.enums.TicketStatus;
 import TicketCodeIA.domain.model.ticket.Ticket;
-import TicketCodeIA.domain.port.in.POAgentPort;
+import TicketCodeIA.domain.port.in.ExpertAgentPort;
 import TicketCodeIA.domain.port.out.TicketRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ class ProcessProjectUseCaseTest {
 
     @Mock private TicketRepositoryPort ticketRepository;
     @Mock private ProcessTicketUseCase processTicketUseCase;
-    @Mock private POAgentPort poAgentPort;
+    @Mock private ExpertAgentPort expertAgentPort;
     @InjectMocks private ProcessProjectUseCase useCase;
 
     private Ticket todoTicket(Long id, boolean enableCodeReview, boolean enableTesting) {
@@ -41,11 +41,11 @@ class ProcessProjectUseCaseTest {
         useCase.execute(1L);
 
         verify(processTicketUseCase, never()).execute(anyLong(), anyBoolean(), anyBoolean());
-        verify(poAgentPort, never()).chooseNextTicket(anyList(), anyList());
+        verify(expertAgentPort, never()).chooseNextTicket(anyList(), anyList());
     }
 
     @Test
-    void execute_poAgentChoosesNextTicket() {
+    void execute_expertAgentChoosesNextTicket() {
         Ticket t1 = todoTicket(1L, true, true);
         Ticket t2 = todoTicket(2L, false, false);
 
@@ -61,7 +61,7 @@ class ProcessProjectUseCaseTest {
                 .thenReturn(List.of(t1, t2));
 
         // PO chooses t2 first, then t1
-        when(poAgentPort.chooseNextTicket(anyList(), anyList()))
+        when(expertAgentPort.chooseNextTicket(anyList(), anyList()))
                 .thenReturn(2L)
                 .thenReturn(1L);
 
@@ -70,7 +70,7 @@ class ProcessProjectUseCaseTest {
 
         useCase.execute(1L);
 
-        verify(poAgentPort, times(2)).chooseNextTicket(anyList(), anyList());
+        verify(expertAgentPort, times(2)).chooseNextTicket(anyList(), anyList());
         verify(processTicketUseCase).execute(2L, false, false);
         verify(processTicketUseCase).execute(1L, true, true);
     }
@@ -89,7 +89,7 @@ class ProcessProjectUseCaseTest {
                 .thenReturn(0L);
         when(ticketRepository.findByProjectId(1L))
                 .thenReturn(List.of(t1Done));
-        when(poAgentPort.chooseNextTicket(anyList(), anyList()))
+        when(expertAgentPort.chooseNextTicket(anyList(), anyList()))
                 .thenReturn(1L);
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(t1Done));
 
@@ -108,7 +108,7 @@ class ProcessProjectUseCaseTest {
                 .thenReturn(0L);
         when(ticketRepository.findByProjectId(1L))
                 .thenReturn(List.of(t1));
-        when(poAgentPort.chooseNextTicket(anyList(), anyList()))
+        when(expertAgentPort.chooseNextTicket(anyList(), anyList()))
                 .thenReturn(1L);
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(t1));
 

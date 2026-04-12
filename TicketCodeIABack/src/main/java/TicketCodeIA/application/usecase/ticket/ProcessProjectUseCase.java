@@ -2,7 +2,7 @@ package TicketCodeIA.application.usecase.ticket;
 
 import TicketCodeIA.domain.enums.TicketStatus;
 import TicketCodeIA.domain.model.ticket.Ticket;
-import TicketCodeIA.domain.port.in.POAgentPort;
+import TicketCodeIA.domain.port.in.ExpertAgentPort;
 import TicketCodeIA.domain.port.out.TicketRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class ProcessProjectUseCase {
 
     private final TicketRepositoryPort ticketRepository;
     private final ProcessTicketUseCase processTicketUseCase;
-    private final POAgentPort poAgentPort;
+    private final ExpertAgentPort expertAgentPort;
 
     @Async
     public void executeAsync(Long projectId) {
@@ -98,7 +98,7 @@ public class ProcessProjectUseCase {
                     return m;
                 }).toList();
 
-        return poAgentPort.chooseNextTicket(allTicketsSummary, todoList);
+        return expertAgentPort.chooseNextTicket(allTicketsSummary, todoList);
     }
 
     private void waitForPipelineClear(Long projectId) {

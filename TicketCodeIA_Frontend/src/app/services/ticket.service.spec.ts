@@ -173,26 +173,6 @@ describe('TicketService', () => {
     req.flush(mockLogs);
   });
 
-  it('should generate tickets from requirements', () => {
-    service.generateTickets('Build a login', 5).subscribe(tickets => {
-      expect(tickets.length).toBe(1);
-    });
-
-    const req = httpTesting.expectOne('http://localhost:8080/api/agents/generate-tickets');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ requirements: 'Build a login', projectId: 5 });
-    req.flush([mockTicket]);
-  });
-
-  it('should process project', () => {
-    service.processProject(5).subscribe();
-
-    const req = httpTesting.expectOne(r => r.url.includes('process-project'));
-    expect(req.request.method).toBe('POST');
-    expect(req.request.url).toContain('projectId=5');
-    req.flush(null);
-  });
-
   it('should get recent activity', () => {
     service.getRecentActivity().subscribe(activity => {
       expect(activity.length).toBe(0);

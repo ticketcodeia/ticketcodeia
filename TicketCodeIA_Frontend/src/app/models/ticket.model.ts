@@ -78,11 +78,6 @@ export interface TicketStats {
   humanTesting: number;
 }
 
-export interface RequirementsRequest {
-  requirements: string;
-  projectId: number | null;
-}
-
 export interface AgentLog {
   id: number;
   ticketId: number;

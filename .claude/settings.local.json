@@ -29,7 +29,11 @@
       "Bash(curl:*)",
       "Bash(jar tf:*)",
       "Bash(python3 -c \" import zipfile, sys jar = zipfile.ZipFile\\('C:/Users/sunso/.m2/repository/org/springframework/ai/spring-ai-model/1.0.5/spring-ai-model-1.0.5.jar'\\) for f in jar.namelist\\(\\): if 'tool' in f.lower\\(\\) or 'function' in f.lower\\(\\) or 'callback' in f.lower\\(\\): print\\(f\\) \")",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Read(//c/tmp/**)",
+      "Bash(jar xf:*)",
+      "Read(//tmp/org/springframework/ai/tool/function/**)",
+      "Bash(java -cp target/classes -jar /c/Users/sunso/.m2/repository/org/springframework/ai/spring-ai-model/1.0.5/spring-ai-model-1.0.5-sources.jar)"
     ]
   }
 }

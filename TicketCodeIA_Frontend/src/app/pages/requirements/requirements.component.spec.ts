@@ -41,16 +41,8 @@ describe('RequirementsComponent', () => {
     expect(h1.textContent).toBe('Create Tickets');
   });
 
-  it('should start with empty requirements', () => {
-    expect(component.requirements).toBe('');
-    expect(component.generating()).toBe(false);
+  it('should start with empty generated tickets', () => {
     expect(component.generatedTickets().length).toBe(0);
-  });
-
-  it('should not generate when requirements is empty', () => {
-    component.requirements = '   ';
-    component.generateTickets();
-    httpTesting.expectNone('http://localhost:8080/api/agents/generate-tickets');
   });
 
   it('should toggle new project form', () => {

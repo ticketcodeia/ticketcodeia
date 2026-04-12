@@ -133,45 +133,7 @@
       </mat-card>
     </mat-tab>
 
-    <!-- Tab 2: Generate with AI -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">auto_awesome</mat-icon>
-        Generate with AI
-      </ng-template>
-
-      <mat-card class="tab-content-card">
-        <mat-card-content>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Requirements</mat-label>
-            <textarea
-              matInput
-              [(ngModel)]="requirements"
-              placeholder="Enter your requirements here. Be as detailed as possible..."
-              rows="10">
-            </textarea>
-          </mat-form-field>
-
-          <div class="actions">
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="generateTickets()"
-              [disabled]="generating() || !requirements.trim()">
-              @if (generating()) {
-                <mat-spinner diameter="20" />
-                <span>Generating...</span>
-              } @else {
-                <mat-icon>auto_awesome</mat-icon>
-                <span>Generate Tickets</span>
-              }
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </mat-tab>
-
-    <!-- Tab 3: Create Manually -->
+    <!-- Tab 2: Create Manually -->
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">edit</mat-icon>

@@ -6,7 +6,6 @@ import {
   TicketRequest,
   TicketStats,
   TicketStatus,
-  RequirementsRequest,
   AgentLog,
   ExpertChatRequest,
   ExpertChatResponse
@@ -57,11 +56,6 @@ export class TicketService {
     return this.http.get<AgentLog[]>(`${this.apiUrl}/tickets/${id}/logs`);
   }
 
-  generateTickets(requirements: string, projectId: number | null): Observable<Ticket[]> {
-    const request: RequirementsRequest = { requirements, projectId };
-    return this.http.post<Ticket[]>(`${this.apiUrl}/agents/generate-tickets`, request);
-  }
-
   getRecentActivity(): Observable<AgentLog[]> {
     return this.http.get<AgentLog[]>(`${this.apiUrl}/sse/recent-activity`);
   }
@@ -72,13 +66,6 @@ export class TicketService {
 
   advanceHumanBoardStatus(id: number, status: TicketStatus): Observable<Ticket> {
     return this.http.put<Ticket>(`${this.apiUrl}/tickets/${id}/human-board-status?status=${status}`, {});
-  }
-
-  processProject(projectId: number): Observable<void> {
-    return this.http.post<void>(
-      `${this.apiUrl}/tickets/process-project?projectId=${projectId}`,
-      {}
-    );
   }
 
   expertChat(request: ExpertChatRequest): Observable<ExpertChatResponse> {

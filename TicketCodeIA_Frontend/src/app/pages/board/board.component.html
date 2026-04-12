@@ -10,11 +10,6 @@
         }
       </mat-select>
     </mat-form-field>
-    <button mat-raised-button color="primary" class="start-project-btn"
-            [disabled]="!canStartProject()"
-            (click)="startProject()">
-      {{ processingProject() ? 'Processing...' : 'Start Project' }}
-    </button>
   </div>
 
   <div class="board">

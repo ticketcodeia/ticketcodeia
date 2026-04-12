@@ -54,12 +54,8 @@ export class RequirementsComponent implements OnInit, OnDestroy {
 
   activeTab = 0;
 
-  // AI generation
-  requirements = '';
-  generating = signal(false);
-  generatedTickets = signal<Ticket[]>([]);
-
   // Manual creation
+  generatedTickets = signal<Ticket[]>([]);
   manualTitle = '';
   manualDescription = '';
   manualPriority: Priority = Priority.MEDIUM;
@@ -108,54 +104,6 @@ export class RequirementsComponent implements OnInit, OnDestroy {
         console.error('Error creating project:', err);
         this.creatingProject.set(false);
         this.snackBar.open('Error creating project', 'Close', { duration: 3000 });
-      }
-    });
-  }
-
-  generateTickets(): void {
-    if (!this.requirements.trim()) return;
-
-    if (this.showNewProject && this.newProjectName.trim() && !this.selectedProjectId) {
-      this.creatingProject.set(true);
-      this.projectService.createProject({
-        name: this.newProjectName.trim(),
-        description: this.newProjectDescription.trim()
-      }).subscribe({
-        next: (project) => {
-          this.projects.update(list => [...list, project]);
-          this.selectedProjectId = project.id;
-          this.newProjectName = '';
-          this.newProjectDescription = '';
-          this.showNewProject = false;
-          this.creatingProject.set(false);
-          this.snackBar.open(`Project "${project.name}" created!`, 'Close', { duration: 2000 });
-          this.doGenerateTickets();
-        },
-        error: (err) => {
-          console.error('Error creating project:', err);
-          this.creatingProject.set(false);
-          this.snackBar.open('Error creating project', 'Close', { duration: 3000 });
-        }
-      });
-    } else {
-      this.doGenerateTickets();
-    }
-  }
-
-  private doGenerateTickets(): void {
-    this.generating.set(true);
-    this.generatedTickets.set([]);
-
-    this.ticketService.generateTickets(this.requirements, this.selectedProjectId).subscribe({
-      next: (tickets) => {
-        this.generatedTickets.set(tickets);
-        this.generating.set(false);
-        this.snackBar.open(`Generated ${tickets.length} tickets!`, 'Close', { duration: 3000 });
-      },
-      error: (err) => {
-        console.error('Error generating tickets:', err);
-        this.generating.set(false);
-        this.snackBar.open('Error generating tickets', 'Close', { duration: 5000 });
       }
     });
   }

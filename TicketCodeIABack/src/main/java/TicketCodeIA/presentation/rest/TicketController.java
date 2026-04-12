@@ -32,7 +32,6 @@ public class TicketController {
     private final GetAgentLogsUseCase getAgentLogsUseCase;
     private final DeleteTicketUseCase deleteTicketUseCase;
     private final MoveTicketOnHumanBoardUseCase moveTicketOnHumanBoardUseCase;
-    private final ProcessProjectUseCase processProjectUseCase;
 
     @PostMapping
     public ResponseEntity<TicketResponse> createTicket(@RequestBody CreateTicketRequest request) {
@@ -85,12 +84,6 @@ public class TicketController {
         processTicketUseCase.executeAsync(id, request.isEnableCodeReview(), request.isEnableTesting());
         TicketResult result = getTicketUseCase.getById(id);
         return ResponseEntity.accepted().body(TicketResponse.fromResult(result));
-    }
-
-    @PostMapping("/process-project")
-    public ResponseEntity<Void> processProject(@RequestParam Long projectId) {
-        processProjectUseCase.executeAsync(projectId);
-        return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/{id}/move-to-human-board")
