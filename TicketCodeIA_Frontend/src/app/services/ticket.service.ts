@@ -7,7 +7,9 @@ import {
   TicketStats,
   TicketStatus,
   RequirementsRequest,
-  AgentLog
+  AgentLog,
+  ExpertChatRequest,
+  ExpertChatResponse
 } from '../models/ticket.model';
 
 @Injectable({
@@ -77,5 +79,13 @@ export class TicketService {
       `${this.apiUrl}/tickets/process-project?projectId=${projectId}`,
       {}
     );
+  }
+
+  expertChat(request: ExpertChatRequest): Observable<ExpertChatResponse> {
+    return this.http.post<ExpertChatResponse>(`${this.apiUrl}/agents/expert/chat`, request);
+  }
+
+  clearExpertSession(sessionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/agents/expert/session/${sessionId}`);
   }
 }

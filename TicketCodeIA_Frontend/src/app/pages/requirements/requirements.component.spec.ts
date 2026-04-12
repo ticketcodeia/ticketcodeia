@@ -74,6 +74,31 @@ describe('RequirementsComponent', () => {
     httpTesting.expectOne('http://localhost:8080/api/projects').flush([]);
 
     const subtitle = fixture.nativeElement.querySelector('.subtitle');
-    expect(subtitle.textContent).toContain('AI');
+    expect(subtitle.textContent).toContain('Expert Agent');
+  });
+
+  it('should start with empty chat', () => {
+    expect(component.chatMessages().length).toBe(0);
+    expect(component.chatLoading()).toBe(false);
+    expect(component.chatInput).toBe('');
+  });
+
+  it('should not send chat when input is empty', () => {
+    component.chatInput = '   ';
+    component.sendChatMessage();
+    httpTesting.expectNone('http://localhost:8080/api/agents/expert/chat');
+  });
+
+  it('should clear chat session', () => {
+    component.chatMessages.set([{ role: 'user', content: 'hello', timestamp: new Date() }]);
+    const oldSessionId = component.chatSessionId;
+
+    component.clearChat();
+
+    const req = httpTesting.expectOne(`http://localhost:8080/api/agents/expert/session/${oldSessionId}`);
+    req.flush(null);
+
+    expect(component.chatMessages().length).toBe(0);
+    expect(component.chatSessionId).not.toBe(oldSessionId);
   });
 });

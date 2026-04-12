@@ -23,7 +23,8 @@ export enum AgentType {
   DEVELOPER = 'DEVELOPER',
   REVIEWER = 'REVIEWER',
   TESTER = 'TESTER',
-  HUMAN = 'HUMAN'
+  HUMAN = 'HUMAN',
+  EXPERT = 'EXPERT'
 }
 
 export interface Project {
@@ -89,6 +90,23 @@ export interface AgentLog {
   action: string;
   message: string;
   timestamp: string;
+}
+
+export interface ExpertChatRequest {
+  sessionId: string;
+  message: string;
+  projectId: number | null;
+}
+
+export interface ExpertChatResponse {
+  sessionId: string;
+  message: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
 }
 
 export interface SseEvent {

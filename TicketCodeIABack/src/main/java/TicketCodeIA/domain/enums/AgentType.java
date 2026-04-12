@@ -5,5 +5,6 @@ public enum AgentType {
     DEVELOPER,
     REVIEWER,
     TESTER,
-    HUMAN
+    HUMAN,
+    EXPERT
 }

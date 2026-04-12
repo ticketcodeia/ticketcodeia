@@ -4,6 +4,7 @@ import TicketCodeIA.application.query.TicketResult;
 import TicketCodeIA.application.usecase.agent.GenerateTicketsFromRequirementsUseCase;
 import TicketCodeIA.domain.enums.Priority;
 import TicketCodeIA.domain.enums.TicketStatus;
+import TicketCodeIA.infrastructure.agent.ExpertAgentAdapter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -24,6 +25,7 @@ class AgentControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockBean private GenerateTicketsFromRequirementsUseCase generateTicketsUseCase;
+    @MockBean private ExpertAgentAdapter expertAgentAdapter;
 
     @Test
     void generateTickets_returns200() throws Exception {

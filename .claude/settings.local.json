@@ -18,7 +18,18 @@
       "Bash(npm list:*)",
       "Bash(npm test:*)",
       "Bash(npx ng:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "WebSearch",
+      "WebFetch(domain:piotrminkowski.com)",
+      "Bash(./mvnw dependency:resolve -q)",
+      "Bash(./mvnw dependency:tree -Dincludes=\"*:jackson*\")",
+      "Bash(./mvnw compile:*)",
+      "Bash(curl -s \"https://repo1.maven.org/maven2/org/springframework/ai/\")",
+      "Bash(curl -s \"https://repo1.maven.org/maven2/org/springframework/ai/spring-ai-anthropic-spring-boot-starter/\")",
+      "Bash(curl:*)",
+      "Bash(jar tf:*)",
+      "Bash(python3 -c \" import zipfile, sys jar = zipfile.ZipFile\\('C:/Users/sunso/.m2/repository/org/springframework/ai/spring-ai-model/1.0.5/spring-ai-model-1.0.5.jar'\\) for f in jar.namelist\\(\\): if 'tool' in f.lower\\(\\) or 'function' in f.lower\\(\\) or 'callback' in f.lower\\(\\): print\\(f\\) \")",
+      "Bash(python3:*)"
     ]
   }
 }

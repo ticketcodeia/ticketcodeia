@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -13,7 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TicketService } from '../../services/ticket.service';
 import { ProjectService } from '../../services/project.service';
-import { Ticket, Project, Priority } from '../../models/ticket.model';
+import { Ticket, Project, Priority, ChatMessage } from '../../models/ticket.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 
 @Component({
@@ -37,10 +37,12 @@ import { StatusBadgeComponent } from '../../components/status-badge/status-badge
   templateUrl: './requirements.component.html',
   styleUrls: ['./requirements.component.css']
 })
-export class RequirementsComponent implements OnInit {
+export class RequirementsComponent implements OnInit, OnDestroy {
   private readonly ticketService = inject(TicketService);
   private readonly projectService = inject(ProjectService);
   private readonly snackBar = inject(MatSnackBar);
+
+  @ViewChild('chatMessagesContainer') chatMessagesContainer!: ElementRef;
 
   projects = signal<Project[]>([]);
   selectedProjectId: number | null = null;
@@ -63,8 +65,20 @@ export class RequirementsComponent implements OnInit {
   manualPriority: Priority = Priority.MEDIUM;
   creatingTicket = signal(false);
 
+  // Expert Agent chat
+  chatMessages = signal<ChatMessage[]>([]);
+  chatInput = '';
+  chatLoading = signal(false);
+  chatSessionId = this.generateSessionId();
+
   ngOnInit(): void {
     this.loadProjects();
+  }
+
+  ngOnDestroy(): void {
+    if (this.chatMessages().length > 0) {
+      this.ticketService.clearExpertSession(this.chatSessionId).subscribe();
+    }
   }
 
   loadProjects(): void {
@@ -170,5 +184,72 @@ export class RequirementsComponent implements OnInit {
         this.snackBar.open('Error creating ticket', 'Close', { duration: 5000 });
       }
     });
+  }
+
+  // Expert Agent chat methods
+  sendChatMessage(): void {
+    const message = this.chatInput.trim();
+    if (!message || this.chatLoading()) return;
+
+    this.chatMessages.update(msgs => [...msgs, {
+      role: 'user',
+      content: message,
+      timestamp: new Date()
+    }]);
+    this.chatInput = '';
+    this.chatLoading.set(true);
+    this.scrollChatToBottom();
+
+    this.ticketService.expertChat({
+      sessionId: this.chatSessionId,
+      message: message,
+      projectId: this.selectedProjectId
+    }).subscribe({
+      next: (response) => {
+        this.chatMessages.update(msgs => [...msgs, {
+          role: 'assistant',
+          content: response.message,
+          timestamp: new Date()
+        }]);
+        this.chatLoading.set(false);
+        this.scrollChatToBottom();
+      },
+      error: (err) => {
+        console.error('Expert chat error:', err);
+        this.chatMessages.update(msgs => [...msgs, {
+          role: 'assistant',
+          content: 'Sorry, an error occurred. Please try again.',
+          timestamp: new Date()
+        }]);
+        this.chatLoading.set(false);
+        this.scrollChatToBottom();
+      }
+    });
+  }
+
+  clearChat(): void {
+    this.ticketService.clearExpertSession(this.chatSessionId).subscribe();
+    this.chatMessages.set([]);
+    this.chatSessionId = this.generateSessionId();
+  }
+
+  onChatKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendChatMessage();
+    }
+  }
+
+  private scrollChatToBottom(): void {
+    setTimeout(() => {
+      if (this.chatMessagesContainer) {
+        const el = this.chatMessagesContainer.nativeElement;
+        el.scrollTop = el.scrollHeight;
+      }
+    }, 50);
+  }
+
+  private generateSessionId(): string {
+    return 'expert-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
   }
 }

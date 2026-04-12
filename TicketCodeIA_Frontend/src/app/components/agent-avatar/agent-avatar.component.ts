@@ -20,7 +20,8 @@ export class AgentAvatarComponent {
       [AgentType.DEVELOPER]: '💻',
       [AgentType.REVIEWER]: '🔍',
       [AgentType.TESTER]: '🧪',
-      [AgentType.HUMAN]: '👤'
+      [AgentType.HUMAN]: '👤',
+      [AgentType.EXPERT]: '🧠'
     };
     return emojiMap[this.agent()!] || '❓';
   });
@@ -33,7 +34,8 @@ export class AgentAvatarComponent {
       [AgentType.DEVELOPER]: 'Developer',
       [AgentType.REVIEWER]: 'Reviewer',
       [AgentType.TESTER]: 'Tester',
-      [AgentType.HUMAN]: 'Human'
+      [AgentType.HUMAN]: 'Human',
+      [AgentType.EXPERT]: 'Expert'
     };
     return labelMap[this.agent()!] || 'Unknown';
   });
