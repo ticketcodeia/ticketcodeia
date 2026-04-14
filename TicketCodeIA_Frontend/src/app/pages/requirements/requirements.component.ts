@@ -66,21 +66,57 @@ export class RequirementsComponent implements OnInit, OnDestroy {
   chatInput = '';
   chatLoading = signal(false);
   chatSessionId = this.generateSessionId();
+  chatHistoryLoading = signal(false);
 
   ngOnInit(): void {
     this.loadProjects();
   }
 
   ngOnDestroy(): void {
-    if (this.chatMessages().length > 0) {
-      this.ticketService.clearExpertSession(this.chatSessionId).subscribe();
-    }
+    // Don't clear session on destroy — history is persisted in DB
   }
 
   loadProjects(): void {
     this.projectService.getAllProjects().subscribe({
       next: (projects) => this.projects.set(projects),
       error: (err) => console.error('Error loading projects:', err)
+    });
+  }
+
+  onProjectChange(): void {
+    if (this.selectedProjectId) {
+      this.loadChatHistory(this.selectedProjectId);
+    } else {
+      // No project selected — start fresh
+      this.chatMessages.set([]);
+      this.chatSessionId = this.generateSessionId();
+    }
+  }
+
+  private loadChatHistory(projectId: number): void {
+    this.chatHistoryLoading.set(true);
+    this.ticketService.getProjectChatHistory(projectId).subscribe({
+      next: (messages) => {
+        if (messages.length > 0) {
+          // Restore session ID from existing history
+          this.chatSessionId = messages[0].sessionId;
+          this.chatMessages.set(messages.map(m => ({
+            role: m.role,
+            content: m.content,
+            timestamp: new Date(m.createdAt)
+          })));
+          this.scrollChatToBottom();
+        } else {
+          // No history for this project — start fresh
+          this.chatMessages.set([]);
+          this.chatSessionId = this.generateSessionId();
+        }
+        this.chatHistoryLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading chat history:', err);
+        this.chatHistoryLoading.set(false);
+      }
     });
   }
 
@@ -98,6 +134,8 @@ export class RequirementsComponent implements OnInit, OnDestroy {
         this.newProjectDescription = '';
         this.showNewProject = false;
         this.creatingProject.set(false);
+        this.chatMessages.set([]);
+        this.chatSessionId = this.generateSessionId();
         this.snackBar.open(`Project "${project.name}" created!`, 'Close', { duration: 3000 });
       },
       error: (err) => {
@@ -140,7 +178,7 @@ export class RequirementsComponent implements OnInit, OnDestroy {
     if (!message || this.chatLoading()) return;
 
     this.chatMessages.update(msgs => [...msgs, {
-      role: 'user',
+      role: 'user' as const,
       content: message,
       timestamp: new Date()
     }]);
@@ -155,7 +193,7 @@ export class RequirementsComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (response) => {
         this.chatMessages.update(msgs => [...msgs, {
-          role: 'assistant',
+          role: 'assistant' as const,
           content: response.message,
           timestamp: new Date()
         }]);
@@ -165,7 +203,7 @@ export class RequirementsComponent implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Expert chat error:', err);
         this.chatMessages.update(msgs => [...msgs, {
-          role: 'assistant',
+          role: 'assistant' as const,
           content: 'Sorry, an error occurred. Please try again.',
           timestamp: new Date()
         }]);

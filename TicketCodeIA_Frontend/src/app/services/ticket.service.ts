@@ -8,7 +8,8 @@ import {
   TicketStatus,
   AgentLog,
   ExpertChatRequest,
-  ExpertChatResponse
+  ExpertChatResponse,
+  ChatMessageResult
 } from '../models/ticket.model';
 
 @Injectable({
@@ -70,6 +71,14 @@ export class TicketService {
 
   expertChat(request: ExpertChatRequest): Observable<ExpertChatResponse> {
     return this.http.post<ExpertChatResponse>(`${this.apiUrl}/agents/expert/chat`, request);
+  }
+
+  getProjectChatHistory(projectId: number): Observable<ChatMessageResult[]> {
+    return this.http.get<ChatMessageResult[]>(`${this.apiUrl}/agents/expert/project/${projectId}/history`);
+  }
+
+  getSessionChatHistory(sessionId: string): Observable<ChatMessageResult[]> {
+    return this.http.get<ChatMessageResult[]>(`${this.apiUrl}/agents/expert/session/${sessionId}/history`);
   }
 
   clearExpertSession(sessionId: string): Observable<void> {

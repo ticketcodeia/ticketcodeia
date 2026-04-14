@@ -104,6 +104,15 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+export interface ChatMessageResult {
+  id: number;
+  sessionId: string;
+  projectId: number | null;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+}
+
 export interface SseEvent {
   type: string;
   data: {

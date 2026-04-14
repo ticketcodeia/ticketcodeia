@@ -81,6 +81,28 @@ describe('RequirementsComponent', () => {
     httpTesting.expectNone('http://localhost:8080/api/agents/expert/chat');
   });
 
+  it('should load chat history when project is selected', () => {
+    component.selectedProjectId = 1;
+    component.onProjectChange();
+
+    const req = httpTesting.expectOne('http://localhost:8080/api/agents/expert/project/1/history');
+    req.flush([
+      { id: 1, sessionId: 'sess-1', projectId: 1, role: 'user', content: 'Hello', createdAt: '2026-04-14T10:00:00' },
+      { id: 2, sessionId: 'sess-1', projectId: 1, role: 'assistant', content: 'Hi!', createdAt: '2026-04-14T10:00:01' }
+    ]);
+
+    expect(component.chatMessages().length).toBe(2);
+    expect(component.chatSessionId).toBe('sess-1');
+  });
+
+  it('should reset chat when no project selected', () => {
+    component.chatMessages.set([{ role: 'user', content: 'test', timestamp: new Date() }]);
+    component.selectedProjectId = null;
+    component.onProjectChange();
+
+    expect(component.chatMessages().length).toBe(0);
+  });
+
   it('should clear chat session', () => {
     component.chatMessages.set([{ role: 'user', content: 'hello', timestamp: new Date() }]);
     const oldSessionId = component.chatSessionId;

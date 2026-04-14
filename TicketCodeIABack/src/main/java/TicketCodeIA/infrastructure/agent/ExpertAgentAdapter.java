@@ -1,5 +1,6 @@
 package TicketCodeIA.infrastructure.agent;
 
+import TicketCodeIA.domain.model.chat.ChatMessage;
 import TicketCodeIA.domain.port.in.ExpertAgentPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -62,45 +62,43 @@ public class ExpertAgentAdapter implements ExpertAgentPort {
     private final ChatClient.Builder chatClientBuilder;
     private final ExpertAgentTools expertAgentTools;
 
-    private final Map<String, List<Message>> conversationHistory = new ConcurrentHashMap<>();
+    /**
+     * Send a message to the Expert Agent with the full conversation history.
+     * Persistence is handled by the use case layer.
+     */
+    public String chat(String sessionId, List<ChatMessage> history, Long projectId) {
+        log.info("Expert Agent: Chat session={}, projectId={}, historySize={}", sessionId, projectId, history.size());
 
-    public String chat(String sessionId, String userMessage, Long projectId) {
-        log.info("Expert Agent: Chat session={}, projectId={}", sessionId, projectId);
-
-        List<Message> history = conversationHistory.computeIfAbsent(sessionId, k -> new ArrayList<>());
-        history.add(new UserMessage(userMessage));
+        List<Message> messages = new ArrayList<>();
+        for (ChatMessage msg : history) {
+            if ("user".equals(msg.getRole())) {
+                messages.add(new UserMessage(msg.getContent()));
+            } else {
+                messages.add(new AssistantMessage(msg.getContent()));
+            }
+        }
 
         try {
-            // Set projectId in ThreadLocal so the @Tool method can access it
             ExpertAgentTools.setCurrentProjectId(projectId);
 
             ChatClient chatClient = chatClientBuilder.build();
 
             String response = chatClient.prompt()
                     .system(SYSTEM_PROMPT)
-                    .messages(history)
+                    .messages(messages)
                     .toolCallbacks(expertAgentTools.getToolCallbacks())
                     .call()
                     .content();
-
-            history.add(new AssistantMessage(response));
 
             log.info("Expert Agent: Response generated for session {}", sessionId);
             return response;
 
         } catch (Exception e) {
             log.error("Expert Agent: Error in chat", e);
-            String errorMsg = "I encountered an error processing your request. Please try again.";
-            history.add(new AssistantMessage(errorMsg));
-            return errorMsg;
+            return "I encountered an error processing your request. Please try again.";
         } finally {
             ExpertAgentTools.clearCurrentProjectId();
         }
-    }
-
-    public void clearSession(String sessionId) {
-        conversationHistory.remove(sessionId);
-        log.info("Expert Agent: Cleared session {}", sessionId);
     }
 
     @Override
