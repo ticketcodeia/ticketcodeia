@@ -12,7 +12,7 @@ import TicketCodeIA.domain.model.ticket.Ticket;
 import TicketCodeIA.domain.port.out.AgentLogRepositoryPort;
 import TicketCodeIA.domain.port.out.ProjectRepositoryPort;
 import TicketCodeIA.domain.port.out.TicketRepositoryPort;
-import TicketCodeIA.infrastructure.agent.ExpertAgentTools.TicketData;
+import TicketCodeIA.application.command.CreateTicketData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class CreateTicketsUseCase {
     private final EventPublisherPort eventPublisher;
 
     @Transactional
-    public List<TicketResult> execute(List<TicketData> ticketDataList, Long projectId) {
+    public List<TicketResult> execute(List<CreateTicketData> ticketDataList, Long projectId) {
         log.info("CreateTickets: Creating {} tickets for project {}", ticketDataList.size(), projectId);
 
         String projectName = null;
@@ -44,7 +44,7 @@ public class CreateTicketsUseCase {
         }
 
         List<TicketResult> results = new ArrayList<>();
-        for (TicketData data : ticketDataList) {
+        for (CreateTicketData data : ticketDataList) {
             Priority priority = parsePriority(data.priority());
             Ticket ticket = Ticket.create(
                     data.title() != null ? data.title() : "Untitled",

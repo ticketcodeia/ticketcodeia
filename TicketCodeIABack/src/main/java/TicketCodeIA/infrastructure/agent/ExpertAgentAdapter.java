@@ -2,6 +2,8 @@ package TicketCodeIA.infrastructure.agent;
 
 import TicketCodeIA.domain.model.chat.ChatMessage;
 import TicketCodeIA.domain.port.in.ExpertAgentPort;
+import TicketCodeIA.infrastructure.agent.tools.ExpertToolContext;
+import TicketCodeIA.infrastructure.agent.tools.ExpertToolRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -60,7 +62,7 @@ public class ExpertAgentAdapter implements ExpertAgentPort {
             """;
 
     private final ChatClient.Builder chatClientBuilder;
-    private final ExpertAgentTools expertAgentTools;
+    private final ExpertToolRegistry expertToolRegistry;
 
     /**
      * Send a message to the Expert Agent with the full conversation history.
@@ -79,14 +81,14 @@ public class ExpertAgentAdapter implements ExpertAgentPort {
         }
 
         try {
-            ExpertAgentTools.setCurrentProjectId(projectId);
+            ExpertToolContext.setCurrentProjectId(projectId);
 
             ChatClient chatClient = chatClientBuilder.build();
 
             String response = chatClient.prompt()
                     .system(SYSTEM_PROMPT)
                     .messages(messages)
-                    .toolCallbacks(expertAgentTools.getToolCallbacks())
+                    .toolCallbacks(expertToolRegistry.getToolCallbacks())
                     .call()
                     .content();
 
@@ -97,7 +99,7 @@ public class ExpertAgentAdapter implements ExpertAgentPort {
             log.error("Expert Agent: Error in chat", e);
             return "I encountered an error processing your request. Please try again.";
         } finally {
-            ExpertAgentTools.clearCurrentProjectId();
+            ExpertToolContext.clearCurrentProjectId();
         }
     }
 
