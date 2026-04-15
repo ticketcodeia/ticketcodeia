@@ -1,0 +1,136 @@
+<div class="config-container">
+  <h1>Config</h1>
+  <p class="subtitle">Runtime agent configuration. Changes take effect immediately on next execution.</p>
+
+  @if (loading()) {
+    <div class="loading">
+      <mat-spinner diameter="40" />
+      <p>Loading configuration...</p>
+    </div>
+  } @else {
+
+    <!-- Developer Agent — Claude Code CLI -->
+    <mat-card class="config-card">
+      <mat-card-content>
+        <h2>Developer Agent (Claude Code CLI)</h2>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Workspace Path</mat-label>
+            <input matInput [(ngModel)]="workspace" />
+            <mat-hint>Default: {{ getDefault('workspace') }}</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>CLI Model</mat-label>
+            <mat-select [(ngModel)]="cliModel">
+              @for (model of cliModels; track model.value) {
+                <mat-option [value]="model.value">{{ model.label }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Default: {{ getDefault('cliModel') }}</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max Turns</mat-label>
+            <input matInput type="number" [(ngModel)]="maxTurns" min="1" max="200" />
+            <mat-hint>Default: {{ getDefault('maxTurns') }}</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Timeout (minutes)</mat-label>
+            <input matInput type="number" [(ngModel)]="timeoutMinutes" min="1" max="30" />
+            <mat-hint>Default: {{ getDefault('timeoutMinutes') }}</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="tools-section">
+          <h3>Allowed Tools</h3>
+          <p class="tools-hint">Default: {{ getDefault('allowedTools') }}</p>
+          <div class="tools-chips">
+            @for (tool of allTools; track tool) {
+              <button
+                mat-stroked-button
+                [class.selected]="isToolSelected(tool)"
+                (click)="toggleTool(tool)">
+                {{ tool }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <mat-divider />
+
+        <div class="toggle-row">
+          <mat-slide-toggle [(ngModel)]="dangerouslySkipPermissions" color="warn">
+            Skip Permissions (--dangerously-skip-permissions)
+          </mat-slide-toggle>
+          <span class="toggle-hint">Default: {{ getDefault('dangerouslySkipPermissions') }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Pipeline -->
+    <mat-card class="config-card">
+      <mat-card-content>
+        <h2>Pipeline</h2>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Max Retries</mat-label>
+            <input matInput type="number" [(ngModel)]="maxRetries" min="1" max="10" />
+            <mat-hint>Default: {{ getDefault('maxRetries') }}</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Anthropic API -->
+    <mat-card class="config-card">
+      <mat-card-content>
+        <h2>Anthropic API (Expert / Reviewer)</h2>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>API Model</mat-label>
+            <mat-select [(ngModel)]="apiModel">
+              @for (model of apiModels; track model.value) {
+                <mat-option [value]="model.value">{{ model.label }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Default: {{ getDefault('apiModel') }}</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Max Tokens</mat-label>
+            <input matInput type="number" [(ngModel)]="maxTokens" min="1024" max="32768" step="1024" />
+            <mat-hint>Default: {{ getDefault('maxTokens') }}</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button mat-stroked-button (click)="resetDefaults()">
+        Reset Defaults
+      </button>
+      <button mat-stroked-button (click)="loadConfig()">
+        Reload
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="saveConfig()"
+        [disabled]="saving()"
+        class="save-btn">
+        @if (saving()) {
+          <mat-spinner diameter="20" />
+          Saving...
+        } @else {
+          Save
+        }
+      </button>
+    </div>
+  }
+</div>

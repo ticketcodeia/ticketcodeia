@@ -3,6 +3,7 @@ package TicketCodeIA.infrastructure.agent;
 import TicketCodeIA.domain.model.ticket.Ticket;
 import TicketCodeIA.domain.port.in.TesterAgentPort;
 import TicketCodeIA.domain.valueobject.AgentResult;
+import TicketCodeIA.domain.valueobject.ProjectContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,8 +22,8 @@ public class TesterAgentAdapter implements TesterAgentPort {
     private final ClaudeCliHelper cliHelper;
 
     @Override
-    public AgentResult process(Ticket ticket) {
-        log.info("Tester Agent: Testing ticket {}", ticket.getId());
+    public AgentResult process(Ticket ticket, ProjectContext context) {
+        log.info("Tester Agent: Testing ticket {} with project context", ticket.getId());
 
         try {
             File workspace = new File(cliHelper.getWorkspacePath());
@@ -31,10 +32,12 @@ public class TesterAgentAdapter implements TesterAgentPort {
             }
 
             String claudePrompt = String.format(
-                    "Write and run unit tests for the recent changes related to: %s\n\nDescription: %s\n\n" +
-                    "Create test files, execute them, and report whether they pass or fail. " +
-                    "End your response with either 'ALL TESTS PASSED' or 'TESTS FAILED'.",
-                    ticket.getTitle(), ticket.getDescription());
+                    "%s\n\n"
+                    + "=== YOUR CURRENT TASK ===\n"
+                    + "Write and run unit tests for ticket #%d: %s\n\nDescription: %s\n\n"
+                    + "Create test files, execute them, and report whether they pass or fail. "
+                    + "End your response with either 'ALL TESTS PASSED' or 'TESTS FAILED'.",
+                    context.toPromptString(), ticket.getId(), ticket.getTitle(), ticket.getDescription());
 
             List<String> command = cliHelper.buildClaudeCommand(claudePrompt);
             log.info("Tester Agent: Running command: {}", String.join(" ", command));

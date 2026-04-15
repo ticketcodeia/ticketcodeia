@@ -7,33 +7,41 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import TicketCodeIA.infrastructure.config.AgentConfig;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class ClaudeCliHelper {
 
-	@Value("${tickcode.workspace}")
-	private String workspacePath;
-
-	@Value("${tickcode.agents.claude-code-max-turns}")
-	private int maxTurns;
-	@Value("${claude.cli.model}")
-	private String model;
+	private final AgentConfig agentConfig;
 
 	public String getWorkspacePath() {
-		return workspacePath;
+		return agentConfig.getWorkspace();
 	}
 
 	public int getMaxTurns() {
-		return maxTurns;
+		return agentConfig.getMaxTurns();
 	}
 
 	public String getModel() {
-		return model;
+		return agentConfig.getCliModel();
+	}
+
+	public String getAllowedTools() {
+		return agentConfig.getAllowedTools();
+	}
+
+	public int getTimeoutMinutes() {
+		return agentConfig.getTimeoutMinutes();
+	}
+
+	public boolean isDangerouslySkipPermissions() {
+		return agentConfig.isDangerouslySkipPermissions();
 	}
 
 	public String findClaudeExecutable() {
@@ -88,14 +96,18 @@ public class ClaudeCliHelper {
 		}
 
 		command.add("--print");
+		command.add("--model");
+		command.add(getModel());
 		command.add(prompt);
 		command.add("--output-format");
 		command.add("text");
 		command.add("--max-turns");
-		command.add(String.valueOf(maxTurns));
+		command.add(String.valueOf(getMaxTurns()));
 		command.add("--allowedTools");
-		command.add("Read,Write,Edit,Bash");
-		command.add("--dangerously-skip-permissions");
+		command.add(getAllowedTools());
+		if (isDangerouslySkipPermissions()) {
+			command.add("--dangerously-skip-permissions");
+		}
 
 		return command;
 	}

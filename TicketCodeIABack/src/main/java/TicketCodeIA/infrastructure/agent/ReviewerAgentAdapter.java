@@ -3,6 +3,7 @@ package TicketCodeIA.infrastructure.agent;
 import TicketCodeIA.domain.model.ticket.Ticket;
 import TicketCodeIA.domain.port.in.ReviewerAgentPort;
 import TicketCodeIA.domain.valueobject.AgentResult;
+import TicketCodeIA.domain.valueobject.ProjectContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,8 @@ public class ReviewerAgentAdapter implements ReviewerAgentPort {
     private String workspacePath;
 
     @Override
-    public AgentResult process(Ticket ticket) {
-        log.info("Reviewer Agent: Reviewing ticket {}", ticket.getId());
+    public AgentResult process(Ticket ticket, ProjectContext context) {
+        log.info("Reviewer Agent: Reviewing ticket {} with project context", ticket.getId());
 
         try {
             String codeToReview = gatherRecentCode();
@@ -38,16 +39,19 @@ public class ReviewerAgentAdapter implements ReviewerAgentPort {
             String prompt = """
                     You are a code reviewer. Review the following code for bugs, security issues, and clean code practices.
 
+                    %s
+
                     Respond with ONLY a valid JSON object in this exact format:
                     {"decision": "APPROVED" or "CHANGES_REQUESTED", "comments": "your review comments"}
 
                     Code to review:
                     %s
 
-                    Ticket context:
-                    Title: %s
+                    Current ticket being reviewed:
+                    Ticket #%d: %s
                     Description: %s
-                    """.formatted(codeToReview, ticket.getTitle(), ticket.getDescription());
+                    """.formatted(context.toPromptString(), codeToReview,
+                    ticket.getId(), ticket.getTitle(), ticket.getDescription());
 
             ChatClient chatClient = chatClientBuilder.build();
             String response = chatClient.prompt().user(prompt).call().content();

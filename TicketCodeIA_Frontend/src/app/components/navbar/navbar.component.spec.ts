@@ -29,12 +29,13 @@ describe('NavbarComponent', () => {
 
   it('should have navigation links', () => {
     const links = fixture.nativeElement.querySelectorAll('.nav-links a');
-    expect(links.length).toBe(5);
+    expect(links.length).toBe(6);
     expect(links[0].textContent.trim()).toContain('Dashboard');
     expect(links[1].textContent.trim()).toContain('Agent Board');
     expect(links[2].textContent.trim()).toContain('Requirements');
     expect(links[3].textContent.trim()).toContain('Escalations');
     expect(links[4].textContent.trim()).toContain('Human Board');
+    expect(links[5].textContent.trim()).toContain('Config');
   });
 
   it('should show connection status', () => {

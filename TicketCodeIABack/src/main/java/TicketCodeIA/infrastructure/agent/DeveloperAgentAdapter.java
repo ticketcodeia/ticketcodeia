@@ -3,6 +3,8 @@ package TicketCodeIA.infrastructure.agent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import TicketCodeIA.domain.model.ticket.Ticket;
 import TicketCodeIA.domain.port.in.DeveloperAgentPort;
 import TicketCodeIA.domain.valueobject.AgentResult;
+import TicketCodeIA.domain.valueobject.ProjectContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,8 +24,8 @@ public class DeveloperAgentAdapter implements DeveloperAgentPort {
 	private final ClaudeCliHelper cliHelper;
 
 	@Override
-	public AgentResult process(Ticket ticket) {
-		log.info("Developer Agent: Processing ticket {}", ticket.getId());
+	public AgentResult process(Ticket ticket, ProjectContext context) {
+		log.info("Developer Agent: Processing ticket {} with project context", ticket.getId());
 
 		try {
 			// Build project-specific workspace
@@ -38,13 +41,22 @@ public class DeveloperAgentAdapter implements DeveloperAgentPort {
 			log.info("Developer Agent: Using Claude CLI: {}", claudeExe);
 
 			String claudePrompt = String.format(
-					"Implement this feature: %s\n\nDescription: %s\n\n"
-							+ "Create the necessary files with clean code. Save all files in the current directory.",
-					ticket.getTitle(), ticket.getDescription());
+					"%s\n\n"
+							+ "=== YOUR CURRENT TASK ===\n"
+							+ "Ticket #%d: %s\n\n"
+							+ "Description: %s\n\n"
+							+ "Create the necessary files with clean code. Save all files in the current directory.\n"
+							+ "Make sure your implementation is consistent with the other tickets in the project.",
+					context.toPromptString(), ticket.getId(), ticket.getTitle(), ticket.getDescription());
 
-			ProcessBuilder pb = new ProcessBuilder(claudeExe, "-p", "--model", cliHelper.getModel(), claudePrompt,
-					"--output-format", "text", "--max-turns", String.valueOf(cliHelper.getMaxTurns()), "--allowedTools",
-					"Read,Write,Edit,Bash", "--dangerously-skip-permissions");
+			List<String> cmdArgs = new ArrayList<>(List.of(
+					claudeExe, "-p", "--model", cliHelper.getModel(), claudePrompt,
+					"--output-format", "text", "--max-turns", String.valueOf(cliHelper.getMaxTurns()),
+					"--allowedTools", cliHelper.getAllowedTools()));
+			if (cliHelper.isDangerouslySkipPermissions()) {
+				cmdArgs.add("--dangerously-skip-permissions");
+			}
+			ProcessBuilder pb = new ProcessBuilder(cmdArgs);
 			pb.directory(workspace);
 			pb.redirectErrorStream(true);
 			pb.environment().putAll(System.getenv());
@@ -61,11 +73,11 @@ public class DeveloperAgentAdapter implements DeveloperAgentPort {
 				}
 			}
 
-			boolean completed = process.waitFor(5, TimeUnit.MINUTES);
+			boolean completed = process.waitFor(cliHelper.getTimeoutMinutes(), TimeUnit.MINUTES);
 
 			if (!completed) {
 				process.destroyForcibly();
-				return AgentResult.failure("Claude Code CLI timed out after 5 minutes");
+				return AgentResult.failure("Claude Code CLI timed out after " + cliHelper.getTimeoutMinutes() + " minutes");
 			}
 
 			int exitCode = process.exitValue();

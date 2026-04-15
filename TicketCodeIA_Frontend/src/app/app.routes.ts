@@ -32,6 +32,11 @@ export const routes: Routes = [
       .then(m => m.HumanBoardComponent)
   },
   {
+    path: 'config',
+    loadComponent: () => import('./pages/config/config.component')
+      .then(m => m.ConfigComponent)
+  },
+  {
     path: '**',
     redirectTo: 'dashboard'
   }

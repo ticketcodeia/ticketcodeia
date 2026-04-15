@@ -19,12 +19,16 @@ import TicketCodeIA.domain.port.out.AgentLogRepositoryPort;
 import TicketCodeIA.domain.port.out.TicketRepositoryPort;
 import TicketCodeIA.domain.service.AgentPipelineService;
 import TicketCodeIA.domain.valueobject.AgentResult;
+import TicketCodeIA.domain.valueobject.ProjectContext;
+import TicketCodeIA.domain.model.project.Project;
+import TicketCodeIA.domain.port.out.ProjectRepositoryPort;
+import TicketCodeIA.infrastructure.config.AgentConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,16 +37,15 @@ import java.util.Optional;
 public class ProcessTicketUseCase {
 
     private final TicketRepositoryPort ticketRepository;
+    private final ProjectRepositoryPort projectRepository;
     private final AgentLogRepositoryPort agentLogRepository;
     private final DeveloperAgentPort developerAgentPort;
     private final ReviewerAgentPort reviewerAgentPort;
     private final TesterAgentPort testerAgentPort;
     private final EventPublisherPort eventPublisher;
+    private final AgentConfig agentConfig;
 
     private final AgentPipelineService pipelineService = new AgentPipelineService();
-
-    @Value("${tickcode.agents.max-retries:3}")
-    private int maxRetries;
 
     @Async
     public void executeAsync(Long ticketId, boolean enableCodeReview, boolean enableTesting) {
@@ -71,7 +74,7 @@ public class ProcessTicketUseCase {
 
         int cycles = 0;
 
-        while (cycles < maxRetries) {
+        while (cycles < agentConfig.getMaxRetries()) {
             ticket = loadTicket(ticketId);
 
             // Ask the domain service which agent should act next
@@ -97,8 +100,11 @@ public class ProcessTicketUseCase {
             eventPublisher.publish(new TicketStatusChangedEvent(ticketId, previousStatus,
                     ticket.getStatus(), agent.getType(), agent.getType() + " started"));
 
+            // Build project context so the agent understands the full picture
+            ProjectContext projectContext = buildProjectContext(ticket);
+
             // Delegate to infrastructure adapter for the actual AI/CLI work
-            AgentResult result = executeAgentPort(agent, ticket);
+            AgentResult result = executeAgentPort(agent, ticket, projectContext);
 
             // Reload ticket and let the domain aggregate apply the result
             ticket = loadTicket(ticketId);
@@ -107,7 +113,7 @@ public class ProcessTicketUseCase {
             ticket = ticketRepository.save(ticket);
 
             // Check if retries exceeded after a changes-requested or test-failure cycle
-            if (shouldContinue && pipelineService.shouldEscalate(ticket, maxRetries)) {
+            if (shouldContinue && pipelineService.shouldEscalate(ticket, agentConfig.getMaxRetries())) {
                 doEscalate(ticket, "Max retry cycles exceeded");
                 return;
             }
@@ -143,15 +149,36 @@ public class ProcessTicketUseCase {
         ticketRepository.save(ticket);
     }
 
-    private AgentResult executeAgentPort(Agent agent, Ticket ticket) {
+    private AgentResult executeAgentPort(Agent agent, Ticket ticket, ProjectContext context) {
         if (agent instanceof DeveloperAgent) {
-            return developerAgentPort.process(ticket);
+            return developerAgentPort.process(ticket, context);
         } else if (agent instanceof ReviewerAgent) {
-            return reviewerAgentPort.process(ticket);
+            return reviewerAgentPort.process(ticket, context);
         } else if (agent instanceof TesterAgent) {
-            return testerAgentPort.process(ticket);
+            return testerAgentPort.process(ticket, context);
         }
         return AgentResult.failure("Unknown agent type: " + agent.getType());
+    }
+
+    private ProjectContext buildProjectContext(Ticket ticket) {
+        String projectName = ticket.getProjectName() != null ? ticket.getProjectName() : "Unknown";
+        String projectDescription = "";
+
+        if (ticket.getProjectId() != null) {
+            projectDescription = projectRepository.findById(ticket.getProjectId())
+                    .map(Project::getDescription)
+                    .orElse("");
+        }
+
+        List<ProjectContext.TicketSummary> allTickets = List.of();
+        if (ticket.getProjectId() != null) {
+            allTickets = ticketRepository.findByProjectIdOrderByCreatedAtDesc(ticket.getProjectId())
+                    .stream()
+                    .map(ProjectContext.TicketSummary::fromTicket)
+                    .toList();
+        }
+
+        return new ProjectContext(projectName, projectDescription, allTickets);
     }
 
     private void publishCompletionEvent(Ticket ticket) {
