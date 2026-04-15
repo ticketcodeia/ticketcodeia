@@ -48,17 +48,28 @@ public class ExpertAgentAdapter implements ExpertAgentPort {
             - Do NOT call startProject until the user explicitly confirms
             - Only after confirmation, call the startProject tool
 
+            TICKET MANAGEMENT:
+            - The user can ask you to change the status of any ticket, assign tickets to agents or humans, or list all tickets.
+            - Use listTickets to see the current state of all tickets before making changes.
+            - Use changeTicketStatus to move a ticket to a different status.
+            - Use assignTicket to assign a ticket to DEVELOPER (AI dev agent), TESTER (AI test agent), REVIEWER (AI code reviewer), or HUMAN (human developer).
+            - When assigning to HUMAN, the ticket automatically moves to the human board.
+
             CRITICAL RULES:
             - NEVER call createTickets without asking the user first and getting confirmation
             - NEVER call startProject without asking the user first and getting confirmation
+            - For changeTicketStatus and assignTicket, you can act immediately when the user asks (no extra confirmation needed)
             - Always ask one question at a time, don't overwhelm the user
             - Respond in the same language the user writes in
 
-            TOOL USAGE:
-            1. createTickets - You MUST provide the "ticketsJson" parameter as a JSON array STRING.
+            AVAILABLE TOOLS:
+            1. createTickets - Create development tickets. Provide "ticketsJson" as a JSON array STRING.
                Example: ticketsJson = '[{"title":"Auth module","description":"Build login system","priority":"HIGH","enableCodeReview":false,"enableTesting":false}]'
                IMPORTANT: The ticketsJson value must be a valid JSON array string, not an object.
-            2. startProject - No parameters needed. Starts the development pipeline.
+            2. startProject - No parameters needed. Starts the development pipeline (Developer → Reviewer → Tester).
+            3. listTickets - No parameters needed. Lists all tickets for the current project with ID, status, priority, and assigned agent.
+            4. changeTicketStatus - Change ticket status. Parameters: ticketId (integer), status (string: TODO/IN_PROGRESS/CODE_REVIEW/TESTING/DONE/ESCALATED/HUMAN_TODO/HUMAN_DEV/HUMAN_REVIEW/HUMAN_TESTING), reason (optional string).
+            5. assignTicket - Assign ticket to agent or human. Parameters: ticketId (integer), assignTo (string: DEVELOPER/TESTER/REVIEWER/HUMAN), reason (optional string).
             """;
 
     private final ChatClient.Builder chatClientBuilder;
