@@ -1,3 +1,8 @@
 <span class="status-badge" [class]="statusClass()">
-  {{ statusLabel() }}
+  @if (agentWorking(); as working) {
+    <span class="agent-working-icon">{{ working.emoji }}</span>
+    <span class="agent-working-label">{{ working.label }}</span>
+  } @else {
+    {{ statusLabel() }}
+  }
 </span>

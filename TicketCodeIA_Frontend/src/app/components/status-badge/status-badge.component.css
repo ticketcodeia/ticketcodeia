@@ -1,10 +1,33 @@
 .status-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 12px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
+}
+
+/* Animated robot icon when agent is working */
+.agent-working-icon {
+  display: inline-block;
+  font-size: 14px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.agent-working-label {
+  animation: pulse-text 1.5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .todo {

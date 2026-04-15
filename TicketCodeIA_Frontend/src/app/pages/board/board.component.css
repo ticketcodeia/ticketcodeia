@@ -146,3 +146,46 @@
   padding: 24px;
   font-size: 14px;
 }
+
+/* Agent actively working indicator */
+.ticket-card.agent-active {
+  border-left: 3px solid #e65100;
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+  50% { box-shadow: 0 2px 12px rgba(230, 81, 0, 0.3); }
+}
+
+.agent-working-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background-color: #fff3e0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e65100;
+}
+
+.agent-working-banner .agent-working-icon {
+  font-size: 16px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.agent-working-banner .agent-working-text {
+  animation: pulse-text 1.5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

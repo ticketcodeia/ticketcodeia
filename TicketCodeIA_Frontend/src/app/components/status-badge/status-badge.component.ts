@@ -1,6 +1,6 @@
 import { Component, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TicketStatus } from '../../models/ticket.model';
+import { TicketStatus, AgentType } from '../../models/ticket.model';
 
 @Component({
   selector: 'app-status-badge',
@@ -11,6 +11,7 @@ import { TicketStatus } from '../../models/ticket.model';
 })
 export class StatusBadgeComponent {
   status = input.required<TicketStatus>();
+  assignedAgent = input<AgentType | null>(null);
 
   statusClass = computed(() => {
     const statusMap: Record<TicketStatus, string> = {
@@ -42,5 +43,15 @@ export class StatusBadgeComponent {
       [TicketStatus.HUMAN_TESTING]: 'Human Testing'
     };
     return labelMap[this.status()] || this.status();
+  });
+
+  /** Show animated agent icon when an AI agent is actively working */
+  agentWorking = computed(() => {
+    const s = this.status();
+    const a = this.assignedAgent();
+    if (s === TicketStatus.IN_PROGRESS && a === AgentType.DEVELOPER) return { emoji: '🤖', label: 'Coding...' };
+    if (s === TicketStatus.CODE_REVIEW && a === AgentType.REVIEWER) return { emoji: '🔎', label: 'Reviewing...' };
+    if (s === TicketStatus.TESTING && a === AgentType.TESTER) return { emoji: '🧪', label: 'Testing...' };
+    return null;
   });
 }

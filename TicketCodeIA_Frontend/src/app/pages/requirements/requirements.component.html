@@ -202,7 +202,7 @@
             <mat-card-content>
               <div class="ticket-header">
                 <span class="ticket-id">#{{ ticket.id }}</span>
-                <app-status-badge [status]="ticket.status" />
+                <app-status-badge [status]="ticket.status" [assignedAgent]="ticket.assignedAgent" />
                 @if (ticket.projectName) {
                   <span class="project-badge">{{ ticket.projectName }}</span>
                 }

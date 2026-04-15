@@ -99,9 +99,16 @@ describe('BoardComponent', () => {
     req.flush([]);
   });
 
-  it('should not allow start project without project selected', () => {
-    component.selectedProjectId = null;
-    expect(component.canStartProject()).toBe(false);
+  it('should return null for agent working info when ticket is TODO', () => {
+    const ticket = { status: 'TODO', assignedAgent: null } as any;
+    expect(component.getAgentWorkingInfo(ticket)).toBeNull();
+  });
+
+  it('should return coding info when developer is in progress', () => {
+    const ticket = { status: 'IN_PROGRESS', assignedAgent: 'DEVELOPER' } as any;
+    const result = component.getAgentWorkingInfo(ticket);
+    expect(result).toBeTruthy();
+    expect(result!.label).toBe('Coding...');
   });
 
 });

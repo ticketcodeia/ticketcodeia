@@ -11,7 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TicketService } from '../../services/ticket.service';
 import { ProjectService } from '../../services/project.service';
 import { SseService } from '../../services/sse.service';
-import { Ticket, TicketStatus, SseEvent, Project } from '../../models/ticket.model';
+import { Ticket, TicketStatus, AgentType, SseEvent, Project } from '../../models/ticket.model';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
 import { AgentAvatarComponent } from '../../components/agent-avatar/agent-avatar.component';
 import { TicketDialogComponent } from '../../components/ticket-dialog/ticket-dialog.component';
@@ -104,6 +104,19 @@ export class BoardComponent implements OnInit, OnDestroy {
         this.loadTickets();
       }
     });
+  }
+
+  getAgentWorkingInfo(ticket: Ticket): { emoji: string; label: string } | null {
+    if (ticket.status === TicketStatus.IN_PROGRESS && ticket.assignedAgent === AgentType.DEVELOPER) {
+      return { emoji: '\u{1F916}', label: 'Coding...' };
+    }
+    if (ticket.status === TicketStatus.CODE_REVIEW && ticket.assignedAgent === AgentType.REVIEWER) {
+      return { emoji: '\u{1F50E}', label: 'Reviewing...' };
+    }
+    if (ticket.status === TicketStatus.TESTING && ticket.assignedAgent === AgentType.TESTER) {
+      return { emoji: '\u{1F9EA}', label: 'Testing...' };
+    }
+    return null;
   }
 
   private loadTickets(): void {

@@ -21,7 +21,7 @@
         </div>
         <div class="column-content">
           @for (ticket of getTicketsByStatus(column.status); track ticket.id) {
-            <mat-card class="ticket-card" (click)="openTicketDialog(ticket)">
+            <mat-card class="ticket-card" [class.agent-active]="getAgentWorkingInfo(ticket)" (click)="openTicketDialog(ticket)">
               <mat-card-content>
                 <div class="ticket-header">
                   <span class="ticket-id">#{{ ticket.id }}</span>
@@ -30,6 +30,12 @@
                   </span>
                 </div>
                 <div class="ticket-title">{{ ticket.title }}</div>
+                @if (getAgentWorkingInfo(ticket); as working) {
+                  <div class="agent-working-banner">
+                    <span class="agent-working-icon">{{ working.emoji }}</span>
+                    <span class="agent-working-text">{{ working.label }}</span>
+                  </div>
+                }
                 <div class="ticket-footer">
                   <div class="agent-flags">
                     <span class="flag" [class.active]="ticket.enableCodeReview" title="Code Review">🔍</span>
