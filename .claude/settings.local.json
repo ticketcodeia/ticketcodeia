@@ -33,7 +33,12 @@
       "Read(//c/tmp/**)",
       "Bash(jar xf:*)",
       "Read(//tmp/org/springframework/ai/tool/function/**)",
-      "Bash(java -cp target/classes -jar /c/Users/sunso/.m2/repository/org/springframework/ai/spring-ai-model/1.0.5/spring-ai-model-1.0.5-sources.jar)"
+      "Bash(java -cp target/classes -jar /c/Users/sunso/.m2/repository/org/springframework/ai/spring-ai-model/1.0.5/spring-ai-model-1.0.5-sources.jar)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
